@@ -1,4 +1,4 @@
-import { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, Packer } from 'docx';
+import { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, Packer, HeadingLevel, ExternalHyperlink } from 'docx';
 import { saveAs } from 'file-saver';
 import pptxgen from 'pptxgenjs';
 
@@ -68,6 +68,23 @@ const createTable = (tableData: string[][]): Table => {
       }))
     }))
   });
+};
+
+const parseResourceLinks = (content: string) => {
+  const lines = content.split('\n');
+  const links: { text: string; url: string }[] = [];
+
+  lines.forEach(line => {
+    if (line.startsWith('*')) {
+      const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+      if (linkMatch) {
+        const [, text, url] = linkMatch;
+        links.push({ text, url });
+      }
+    }
+  });
+
+  return links;
 };
 
 export const generateDocx = async (content: string, filename: string) => {
@@ -143,7 +160,7 @@ export const generatePptx = async (content: string, filename: string) => {
       x: 0.5,
       y: 0.5,
       w: '95%',
-      h: 1.5,  // Increased height for better spacing
+      h: 1.5,
       fontSize: 44,
       bold: true,
       color: colors.text,
@@ -157,17 +174,16 @@ export const generatePptx = async (content: string, filename: string) => {
       .map(line => line.trim())
       .filter(line => line);
 
-    let currentY = 2.3;  // Starting position after title
+    let currentY = 2.3;
     let isSubtitle = true;
-    const availableHeight = 7.5 - currentY - 1.0; // Account for margins and decorative elements
-    const contentHeight = contentLines.length * 0.8; // Estimate height needed
+    const availableHeight = 7.5 - currentY - 1.0;
+    const contentHeight = contentLines.length * 0.8;
     const scaleFactor = Math.min(1, availableHeight / contentHeight);
 
     contentLines.forEach(line => {
       const isListItem = line.startsWith('- ');
       const textContent = isListItem ? line.substring(2) : line;
       
-      // Calculate dynamic font size based on text length
       const baseSize = isSubtitle ? 26 : 20;
       const textLength = textContent.length;
       const dynamicSize = Math.min(
@@ -188,14 +204,13 @@ export const generatePptx = async (content: string, filename: string) => {
         bullet: isListItem ? { type: 'bullet' } : false,
         bold: isSubtitle,
         glow: isSubtitle ? { size: 2, opacity: 0.2, color: colors.accent3 } : undefined,
-        fit: 'shrink' // Automatically adjust text to fit within bounds
+        fit: 'shrink'
       });
 
       currentY += (isSubtitle ? 1.1 : 0.8) * scaleFactor;
       isSubtitle = false;
     });
 
-    // Bottom accent bar
     slide.addShape(pres.ShapeType.rect, {
       x: 0,
       y: 6.8,
@@ -208,7 +223,6 @@ export const generatePptx = async (content: string, filename: string) => {
       line: { color: colors.accent3 }
     });
 
-    // Top accent line
     slide.addShape(pres.ShapeType.rect, {
       x: 0,
       y: 0,
@@ -221,7 +235,6 @@ export const generatePptx = async (content: string, filename: string) => {
       line: { color: colors.accent2 }
     });
 
-    // Subtle corner accent
     slide.addShape(pres.ShapeType.rect, {
       x: 12.5,
       y: 0,
@@ -240,7 +253,40 @@ export const generatePptx = async (content: string, filename: string) => {
 };
 
 export const generatePdf = async (content: string, filename: string) => {
-  // For PDF, we'll keep it simple and just output the raw text for now
-  const blob = new Blob([content], { type: 'text/plain' });
+  const links = parseResourceLinks(content);
+  
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [
+        new Paragraph({
+          text: "Recursos Educativos Complementarios",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 240, after: 120 }
+        }),
+        new Paragraph({
+          text: "Enlaces recomendados para profundizar en el tema:",
+          spacing: { before: 120, after: 240 }
+        }),
+        ...links.map(link => new Paragraph({
+          children: [
+            new ExternalHyperlink({
+              children: [
+                new TextRun({
+                  text: link.text,
+                  style: "Hyperlink",
+                  size: 24
+                })
+              ],
+              link: link.url
+            })
+          ],
+          spacing: { before: 120, after: 120 }
+        }))
+      ]
+    }]
+  });
+
+  const blob = await Packer.toBlob(doc);
   saveAs(blob, `${filename}.pdf`);
 };

@@ -81,6 +81,40 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
     );
   };
 
+  const renderResourceLinks = () => {
+    if (!content || type !== 'ejercicios') return null;
+
+    const lines = content.split('\n');
+    const links: string[] = [];
+    let currentLink = '';
+
+    lines.forEach(line => {
+      if (line.startsWith('*')) {
+        const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+        if (linkMatch) {
+          const [, title, url] = linkMatch;
+          links.push(`<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 block mb-2 transition-colors duration-200">${title}</a>`);
+        }
+      } else {
+        currentLink += line + '\n';
+      }
+    });
+
+    return (
+      <div className="space-y-4">
+        <div className="prose prose-indigo max-w-none">
+          <h3 className="text-lg font-semibold mb-4">Recursos Educativos Complementarios</h3>
+          <div 
+            className="space-y-2"
+            dangerouslySetInnerHTML={{ 
+              __html: links.join('\n') 
+            }} 
+          />
+        </div>
+      </div>
+    );
+  };
+
   let icon;
   let bgColor;
   
@@ -130,6 +164,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
           <div className="flex-1 overflow-auto bg-white border border-gray-200 rounded-lg p-4 mb-4 text-sm text-gray-700">
             {type === 'presentacion' && showPreview ? (
               renderPresentationPreview()
+            ) : type === 'ejercicios' ? (
+              renderResourceLinks()
             ) : (
               <pre className="whitespace-pre-line">{content}</pre>
             )}
