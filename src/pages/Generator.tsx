@@ -4,6 +4,7 @@ import ContentDisplay from '../components/Generator/ContentDisplay';
 
 const GUION_ENDPOINT = 'https://minedaiagente-127465468754.europe-west1.run.app/guion';
 const PRESENTACION_ENDPOINT = 'https://minedaiagente-127465468754.europe-west1.run.app/presentacion';
+const ENLACES_ENDPOINT = 'https://minedaiagente-127465468754.europe-west1.run.app/enlaces';
 
 const formatPrompt = (
   tema: string,
@@ -62,8 +63,8 @@ const Generator: React.FC = () => {
     try {
       const prompt = formatPrompt(tema, materia, gradoAcademico, duracion, tipoClase);
       
-      // Fetch both script and presentation content in parallel
-      const [guionResponse, presentacionResponse] = await Promise.all([
+      // Fetch all content in parallel
+      const [guionResponse, presentacionResponse, enlacesResponse] = await Promise.all([
         fetch(GUION_ENDPOINT, {
           method: 'POST',
           headers: {
@@ -77,40 +78,49 @@ const Generator: React.FC = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ prompt }),
+        }),
+        fetch(ENLACES_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt }),
         })
       ]);
 
-      if (!guionResponse.ok || !presentacionResponse.ok) {
+      if (!guionResponse.ok || !presentacionResponse.ok || !enlacesResponse.ok) {
         console.error('Guion Response Status:', guionResponse.status);
         console.error('Presentacion Response Status:', presentacionResponse.status);
+        console.error('Enlaces Response Status:', enlacesResponse.status);
         
         try {
           const guionErrorData = await guionResponse.text();
           const presentacionErrorData = await presentacionResponse.text();
+          const enlacesErrorData = await enlacesResponse.text();
           console.error('Guion Response Error:', guionErrorData);
           console.error('Presentacion Response Error:', presentacionErrorData);
+          console.error('Enlaces Response Error:', enlacesErrorData);
         } catch (parseError) {
           console.error('Error parsing error responses:', parseError);
         }
         
-        throw new Error(`Error en la respuesta del servidor: Guion (${guionResponse.status}), Presentación (${presentacionResponse.status})`);
+        throw new Error(`Error en la respuesta del servidor: Guion (${guionResponse.status}), Presentación (${presentacionResponse.status}), Enlaces (${enlacesResponse.status})`);
       }
 
-      const [guionData, presentacionData] = await Promise.all([
+      const [guionData, presentacionData, enlacesData] = await Promise.all([
         guionResponse.json(),
-        presentacionResponse.json()
+        presentacionResponse.json(),
+        enlacesResponse.json()
       ]);
 
-      if (!guionData.response || !presentacionData.response) {
+      if (!guionData.response || !presentacionData.response || !enlacesData.response) {
         throw new Error('Respuesta del servidor incompleta o inválida');
       }
       
       setGeneratedContent({
         guion: guionData.response,
         presentacion: presentacionData.response,
-        ejercicios: tipoClase === 'practica' 
-          ? `EJERCICIOS PRÁCTICOS: ${tema}\n\n[Contenido generado automáticamente...]`
-          : `PREGUNTAS Y RESPUESTAS: ${tema}\n\n[Contenido generado automáticamente...]`,
+        ejercicios: `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesData.response}`,
       });
     } catch (error) {
       console.error('Error completo al generar contenido:', error);
