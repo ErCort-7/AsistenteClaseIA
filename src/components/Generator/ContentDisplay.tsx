@@ -55,6 +55,42 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
     }
   };
 
+  const renderScriptPreview = () => {
+    if (!content) return null;
+
+    const sections = content.split('\n\n').filter(section => section.trim());
+    
+    return (
+      <div className="space-y-6">
+        {sections.map((section, index) => {
+          const lines = section.split('\n');
+          const title = lines[0];
+          const content = lines.slice(1).join('\n');
+          
+          return (
+            <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-indigo-600 mb-3">
+                {title}
+              </h3>
+              <div className="prose prose-indigo max-w-none">
+                {content.split('\n').map((paragraph, pIndex) => {
+                  const cleanParagraph = paragraph.replace(/^[-•] /, '').trim();
+                  if (!cleanParagraph) return null;
+                  
+                  return (
+                    <p key={pIndex} className="text-gray-700 leading-relaxed mb-2">
+                      {cleanParagraph}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderPresentationPreview = () => {
     if (!content) return null;
 
@@ -86,7 +122,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
 
     const lines = content.split('\n');
     const links: string[] = [];
-    let currentLink = '';
 
     lines.forEach(line => {
       if (line.startsWith('*')) {
@@ -95,8 +130,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
           const [, title, url] = linkMatch;
           links.push(`<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 block mb-2 transition-colors duration-200">${title}</a>`);
         }
-      } else {
-        currentLink += line + '\n';
       }
     });
 
@@ -142,10 +175,10 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
           </div>
           <h3 className="ml-3 text-lg font-medium text-gray-800">{title}</h3>
         </div>
-        {type === 'presentacion' && content && (
+        {(type === 'presentacion' || type === 'guion') && content && (
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="text-sm text-purple-600 hover:text-purple-800"
+            className={`text-sm ${type === 'guion' ? 'text-blue-600 hover:text-blue-800' : 'text-purple-600 hover:text-purple-800'}`}
           >
             {showPreview ? 'Ocultar Vista Previa' : 'Ver Vista Previa'}
           </button>
@@ -164,6 +197,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
           <div className="flex-1 overflow-auto bg-white border border-gray-200 rounded-lg p-4 mb-4 text-sm text-gray-700">
             {type === 'presentacion' && showPreview ? (
               renderPresentationPreview()
+            ) : type === 'guion' && showPreview ? (
+              renderScriptPreview()
             ) : type === 'ejercicios' ? (
               renderResourceLinks()
             ) : (

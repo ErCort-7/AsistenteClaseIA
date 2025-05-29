@@ -3,36 +3,29 @@ import { saveAs } from 'file-saver';
 import pptxgen from 'pptxgenjs';
 
 const parseContent = (content: string) => {
-  const lines = content.split('\n');
+  const sections = content.split('\n\n');
   const elements: any[] = [];
-  let currentTable: string[][] = [];
-  let isInTable = false;
 
-  lines.forEach(line => {
-    if (line.includes('|')) {
-      isInTable = true;
-      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-      if (cells.length > 0) {
-        currentTable.push(cells);
-      }
-    } else {
-      if (isInTable) {
-        if (currentTable.length > 0) {
-          elements.push({ type: 'table', content: currentTable });
-        }
-        currentTable = [];
-        isInTable = false;
-      }
+  sections.forEach(section => {
+    const lines = section.split('\n');
+    const title = lines[0];
+    const content = lines.slice(1);
 
-      if (line.trim()) {
-        elements.push({ type: 'paragraph', content: line });
+    elements.push({
+      type: 'heading',
+      content: title
+    });
+
+    content.forEach(line => {
+      const cleanLine = line.replace(/^[-•] /, '').trim();
+      if (cleanLine) {
+        elements.push({
+          type: 'paragraph',
+          content: cleanLine
+        });
       }
-    }
+    });
   });
-
-  if (isInTable && currentTable.length > 0) {
-    elements.push({ type: 'table', content: currentTable });
-  }
 
   return elements;
 };
@@ -51,22 +44,6 @@ const createFormattedText = (text: string): TextRun[] => {
       text: part,
       size: 24
     });
-  });
-};
-
-const createTable = (tableData: string[][]): Table => {
-  return new Table({
-    width: {
-      size: 100,
-      type: WidthType.PERCENTAGE,
-    },
-    rows: tableData.map(row => new TableRow({
-      children: row.map(cell => new TableCell({
-        children: [new Paragraph({
-          children: createFormattedText(cell)
-        })]
-      }))
-    }))
   });
 };
 
@@ -90,11 +67,17 @@ const parseResourceLinks = (content: string) => {
 export const generateDocx = async (content: string, filename: string) => {
   const elements = parseContent(content);
   const children = elements.map(element => {
-    if (element.type === 'table') {
-      return createTable(element.content);
+    if (element.type === 'heading') {
+      return new Paragraph({
+        text: element.content,
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 240, after: 120 },
+        thematicBreak: true
+      });
     } else {
       return new Paragraph({
-        children: createFormattedText(element.content)
+        children: createFormattedText(element.content),
+        spacing: { before: 120, after: 120 }
       });
     }
   });
@@ -113,7 +96,6 @@ export const generateDocx = async (content: string, filename: string) => {
 export const generatePptx = async (content: string, filename: string) => {
   const pres = new pptxgen();
   
-  // Set default slide properties
   pres.layout = 'LAYOUT_WIDE';
   pres.defineLayout({ 
     name: 'LAYOUT_WIDE',
@@ -121,28 +103,24 @@ export const generatePptx = async (content: string, filename: string) => {
     height: 7.5
   });
 
-  // Enhanced color palette with dark and semi-dark colors
   const colors = {
-    primary: '1B2A4A',    // Deep navy blue (base)
-    secondary: '2C3E67',  // Rich royal blue
-    accent1: '364B7F',    // Medium slate blue
-    accent2: '1F3355',    // Dark slate blue
-    accent3: '253C62',    // Steel blue
-    text: 'FFFFFF'        // White
+    primary: '1B2A4A',
+    secondary: '2C3E67',
+    accent1: '364B7F',
+    accent2: '1F3355',
+    accent3: '253C62',
+    text: 'FFFFFF'
   };
 
-  // Parse slides from content
   const slides = content.split('\n\n').filter(slide => slide.trim());
   
   slides.forEach((slideContent, index) => {
     const slide = pres.addSlide();
     const [title, ...content] = slideContent.split('\n');
 
-    // Alternate background colors for visual interest while maintaining coherence
     const bgColor = index % 3 === 0 ? colors.primary : 
                    index % 3 === 1 ? colors.secondary : colors.accent1;
 
-    // Set gradient background with subtle pattern
     slide.background = { 
       color: bgColor,
       gradient: {
@@ -155,7 +133,6 @@ export const generatePptx = async (content: string, filename: string) => {
       }
     };
     
-    // Add title with Century Gothic font, centered with more space
     slide.addText(title.replace('Diapositiva ', ''), {
       x: 0.5,
       y: 0.5,
@@ -169,7 +146,6 @@ export const generatePptx = async (content: string, filename: string) => {
       glow: { size: 3, opacity: 0.3, color: colors.accent3 }
     });
 
-    // Process content to separate subtitles and regular text
     const contentLines = content
       .map(line => line.trim())
       .filter(line => line);
