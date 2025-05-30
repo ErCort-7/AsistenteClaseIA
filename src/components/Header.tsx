@@ -9,16 +9,9 @@ const Header: React.FC = () => {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/image.png" 
-              alt="Gobierno de El Salvador"
-              className="h-10"
-            />
-            <div className="flex items-center">
-              <Sparkles className="h-8 w-8 text-[#1a365d]" />
-              <span className="ml-2 text-xl font-semibold text-[#1a365d]">EduAsistent</span>
-            </div>
+          <div className="flex items-center">
+            <Sparkles className="h-8 w-8 text-[#1a365d]" />
+            <span className="ml-2 text-xl font-semibold text-[#1a365d]">EduAsistent</span>
           </div>
           
           <nav className="hidden md:flex space-x-8">

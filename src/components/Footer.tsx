@@ -6,12 +6,7 @@ const Footer: React.FC = () => {
     <footer className="bg-[#1a365d] text-white">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="md:flex md:items-center md:justify-between">
-          <div className="flex justify-center md:justify-start items-center space-x-4">
-            <img 
-              src="/image.png" 
-              alt="Gobierno de El Salvador"
-              className="h-12 brightness-200"
-            />
+          <div className="flex justify-center md:justify-start">
             <p className="text-center text-sm">
               &copy; {new Date().getFullYear()} EduAsistent. Todos los derechos reservados.
             </p>
