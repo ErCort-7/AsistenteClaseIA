@@ -12,7 +12,7 @@ interface ContentDisplayProps {
 
 const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, isLoading, format }) => {
   const [copied, setCopied] = React.useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(type === 'guion' || type === 'presentacion');
 
   const handleCopy = () => {
     if (content) {
@@ -121,14 +121,14 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
     if (!content || type !== 'ejercicios') return null;
 
     const lines = content.split('\n');
-    const links: string[] = [];
+    const links: { text: string; url: string }[] = [];
 
     lines.forEach(line => {
       if (line.startsWith('*')) {
         const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
         if (linkMatch) {
-          const [, title, url] = linkMatch;
-          links.push(`<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 block mb-2 transition-colors duration-200">${title}</a>`);
+          const [, , url] = linkMatch;
+          links.push({ text: `Contenido ${links.length + 1}`, url });
         }
       }
     });
@@ -137,12 +137,22 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
       <div className="space-y-4">
         <div className="prose prose-indigo max-w-none">
           <h3 className="text-lg font-semibold mb-4">Recursos Educativos Complementarios</h3>
-          <div 
-            className="space-y-2"
-            dangerouslySetInnerHTML={{ 
-              __html: links.join('\n') 
-            }} 
-          />
+          <p className="text-sm text-amber-600 mb-4">
+            Nota: Algunos enlaces pueden estar desactualizados o no disponibles.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {links.map((link, index) => (
+              <a
+                key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-200"
+              >
+                {link.text}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     );
