@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import TopicForm from '../components/Generator/TopicForm';
 import ContentDisplay from '../components/Generator/ContentDisplay';
 
-const GUION_ENDPOINT = 'https://minedaiagente-127465468754.europe-west1.run.app/guion';
-const PRESENTACION_ENDPOINT = 'https://minedaiagente-127465468754.europe-west1.run.app/presentacion';
-const ENLACES_ENDPOINT = 'https://enlaces-127465468754.us-central1.run.app';
+const GUION_ENDPOINT = '/api/minedaiagente/guion';
+const PRESENTACION_ENDPOINT = '/api/minedaiagente/presentacion';
+const ENLACES_ENDPOINT = '/api/enlaces';
 
 const formatPrompt = (
   tema: string,
