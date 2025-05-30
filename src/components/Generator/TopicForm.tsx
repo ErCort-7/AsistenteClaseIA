@@ -55,7 +55,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Generar Contenido de Clase</h2>
+      <h2 className="text-xl font-semibold text-[#1a365d] mb-4">Generar Contenido de Clase</h2>
       
       <form onSubmit={handleSubmit}>
         <div className="mb-6">
@@ -68,7 +68,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
             value={contenido.tema}
             onChange={(e) => handleInputChange('tema', e.target.value)}
             placeholder="ej: Fracciones, Fotosíntesis, Guerra Mundial..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] transition-colors duration-200"
             required
           />
         </div>
@@ -82,7 +82,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
               id="materia"
               value={contenido.materia}
               onChange={(e) => handleInputChange('materia', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] transition-colors duration-200"
             >
               <option value="matematicas">Matemáticas</option>
               <option value="ciencias">Ciencias Naturales</option>
@@ -102,7 +102,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
               id="gradoAcademico"
               value={contenido.gradoAcademico}
               onChange={(e) => handleInputChange('gradoAcademico', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] transition-colors duration-200"
             >
               <optgroup label="Primaria">
                 <option value="1-primaria">1º de Primaria</option>
@@ -133,7 +133,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
               id="duracion"
               value={contenido.duracion}
               onChange={(e) => handleInputChange('duracion', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] transition-colors duration-200"
             >
               <option value="45">45 minutos</option>
               <option value="60">1 hora</option>
@@ -152,7 +152,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
             <label className="inline-flex items-center">
               <input
                 type="radio"
-                className="form-radio text-indigo-600"
+                className="form-radio text-[#1a365d]"
                 name="tipoClase"
                 value="teorica"
                 checked={contenido.tipoClase === 'teorica'}
@@ -163,7 +163,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
             <label className="inline-flex items-center">
               <input
                 type="radio"
-                className="form-radio text-indigo-600"
+                className="form-radio text-[#1a365d]"
                 name="tipoClase"
                 value="practica"
                 checked={contenido.tipoClase === 'practica'}
@@ -179,8 +179,8 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
           disabled={isLoading || !contenido.tema.trim()}
           className={`w-full flex justify-center items-center px-6 py-3 rounded-lg text-white font-medium ${
             isLoading || !contenido.tema.trim() 
-              ? 'bg-indigo-300 cursor-not-allowed' 
-              : 'bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200'
+              ? 'bg-[#1a365d]/50 cursor-not-allowed' 
+              : 'bg-[#1a365d] hover:bg-[#102a4c] transition-colors duration-200'
           }`}
         >
           {isLoading ? (
