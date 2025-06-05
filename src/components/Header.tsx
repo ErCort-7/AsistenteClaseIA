@@ -1,9 +1,16 @@
 import React from 'react';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X, HelpCircle } from 'lucide-react';
 import { useNavigation } from '../hooks/useNavigation';
 
 const Header: React.FC = () => {
   const { isMenuOpen, toggleMenu } = useNavigation();
+  const [showHelpMenu, setShowHelpMenu] = React.useState(false);
+
+  const helpItems = [
+    { title: 'Guía de Creación', description: 'Aprende a crear contenido efectivo' },
+    { title: 'Preguntas Frecuentes', description: 'Resolvemos tus dudas comunes' },
+    { title: 'Contacto', description: 'Escríbenos a support@eduasistent.com' }
+  ];
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -18,15 +25,29 @@ const Header: React.FC = () => {
             <a href="#" className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200">
               Inicio
             </a>
-            <a href="#" className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200">
-              Mis Clases
-            </a>
-            <a href="#" className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200">
-              Presentaciones
-            </a>
-            <a href="#" className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200">
-              Ayuda
-            </a>
+            <div className="relative">
+              <button
+                onClick={() => setShowHelpMenu(!showHelpMenu)}
+                className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+              >
+                Ayuda <HelpCircle className="ml-1 h-4 w-4" />
+              </button>
+              
+              {showHelpMenu && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-2 z-50">
+                  {helpItems.map((item, index) => (
+                    <a
+                      key={index}
+                      href="#"
+                      className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <div className="font-medium text-gray-900">{item.title}</div>
+                      <div className="text-sm text-gray-500">{item.description}</div>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
           
           <button 
@@ -48,20 +69,19 @@ const Header: React.FC = () => {
             <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200">
               Inicio
             </a>
-            <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200">
-              Mis Clases
-            </a>
-            <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200">
-              Presentaciones
-            </a>
-            <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200">
-              Ayuda
-            </a>
+            {helpItems.map((item, index) => (
+              <a
+                key={index}
+                href="#"
+                className="block px-3 py-2 rounded-md"
+              >
+                <div className="text-base font-medium text-gray-900">{item.title}</div>
+                <div className="text-sm text-gray-500">{item.description}</div>
+              </a>
+            ))}
           </div>
         </div>
       )}
     </header>
   );
 };
-
-export default Header;

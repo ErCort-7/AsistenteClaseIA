@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopicForm from '../components/Generator/TopicForm';
 import ContentDisplay from '../components/Generator/ContentDisplay';
 
@@ -44,6 +44,19 @@ const Generator: React.FC = () => {
     presentacion: null,
     ejercicios: null,
   });
+
+  useEffect(() => {
+    const handleExampleGeneration = (event: CustomEvent) => {
+      const { tema, materia, gradoAcademico, duracion, tipoClase } = event.detail;
+      handleGenerate(tema, materia, gradoAcademico, duracion, tipoClase);
+    };
+
+    document.addEventListener('generateExample', handleExampleGeneration as EventListener);
+
+    return () => {
+      document.removeEventListener('generateExample', handleExampleGeneration as EventListener);
+    };
+  }, []);
 
   const handleGenerate = async (
     tema: string,

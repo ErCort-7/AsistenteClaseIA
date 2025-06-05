@@ -3,7 +3,7 @@ import HistoryCard from '../components/Dashboard/HistoryCard';
 import StatisticsCard from '../components/Dashboard/StatisticsCard';
 import { useNavigate } from '../hooks/useNavigate';
 
-const MOCK_HISTORY = [
+const EXAMPLE_CLASSES = [
   {
     id: '1',
     topic: 'Proceso de Fotosíntesis',
@@ -31,7 +31,21 @@ const Dashboard: React.FC = () => {
   const { navigateTo } = useNavigate();
   
   const handleSelectItem = (id: string) => {
-    console.log(`Elemento seleccionado: ${id}`);
+    const selectedClass = EXAMPLE_CLASSES.find(item => item.id === id);
+    if (selectedClass) {
+      navigateTo('/generate');
+      // Simulate clicking the generate button with the example class data
+      const event = new CustomEvent('generateExample', {
+        detail: {
+          tema: selectedClass.topic,
+          materia: selectedClass.subject.toLowerCase(),
+          gradoAcademico: selectedClass.gradeLevel.toLowerCase().replace('º de ', '-'),
+          duracion: '60',
+          tipoClase: 'teorica'
+        }
+      });
+      document.dispatchEvent(event);
+    }
   };
   
   return (
@@ -49,7 +63,7 @@ const Dashboard: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <HistoryCard items={MOCK_HISTORY} onSelectItem={handleSelectItem} />
+            <HistoryCard items={EXAMPLE_CLASSES} onSelectItem={handleSelectItem} />
           </div>
           
           <div>

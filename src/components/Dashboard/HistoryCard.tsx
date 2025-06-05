@@ -27,7 +27,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ items, onSelectItem }) => {
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Clases Recientes</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Ejemplos</h2>
         <Clock className="h-5 w-5 text-gray-400" />
       </div>
       
@@ -58,7 +58,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ items, onSelectItem }) => {
         </div>
       ) : (
         <div className="text-center py-6 text-gray-500">
-          <p>No hay clases recientes.</p>
+          <p>No hay ejemplos disponibles.</p>
           <p className="text-sm mt-1">¡Genera tu primera clase para verla aquí!</p>
         </div>
       )}
