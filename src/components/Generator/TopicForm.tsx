@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wand2 } from 'lucide-react';
 
 interface ContenidoClase {
@@ -22,17 +22,36 @@ interface TopicFormProps {
 
 const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
   const [contenido, setContenido] = useState<ContenidoClase>({
-    tema: 'Ecuaciones de 1er grado',
+    tema: '',
     materia: 'matematicas',
     gradoAcademico: '4-primaria',
     duracion: '60',
     tipoClase: 'teorica'
   });
 
+  useEffect(() => {
+    const handleExampleData = (event: CustomEvent) => {
+      const { tema, materia, gradoAcademico, duracion, tipoClase } = event.detail;
+      setContenido({
+        tema,
+        materia,
+        gradoAcademico,
+        duracion,
+        tipoClase
+      });
+      onGenerate(tema, materia, gradoAcademico, duracion, tipoClase);
+    };
+
+    document.addEventListener('generateExample', handleExampleData as EventListener);
+
+    return () => {
+      document.removeEventListener('generateExample', handleExampleData as EventListener);
+    };
+  }, [onGenerate]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (contenido.tema.trim()) {
-      console.log('Contenido a enviar al agente IA:', contenido);
       onGenerate(
         contenido.tema,
         contenido.materia,
@@ -185,8 +204,8 @@ const TopicForm: React.FC<TopicFormProps> = ({ onGenerate, isLoading }) => {
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white\" xmlns="http://www.w3.org/2000/svg\" fill="none\" viewBox="0 0 24 24">
-                <circle className="opacity-25\" cx="12\" cy="12\" r="10\" stroke="currentColor\" strokeWidth="4"></circle>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Generando...
