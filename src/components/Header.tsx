@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Menu, X, HelpCircle } from 'lucide-react';
+import { Sparkles, Menu, X, HelpCircle, GraduationCap, Users } from 'lucide-react';
 import { useNavigation } from '../hooks/useNavigation';
 import { useNavigate } from '../hooks/useNavigate';
 
@@ -23,6 +23,16 @@ const Header: React.FC = () => {
     navigateTo('/');
   };
 
+  const handleTeacherClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigateTo('/dashboard');
+  };
+
+  const handleStudentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigateTo('/student-dashboard');
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,6 +52,22 @@ const Header: React.FC = () => {
               className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
               Inicio
+            </a>
+            <a 
+              href="#" 
+              onClick={handleTeacherClick}
+              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+            >
+              <Users className="mr-1 h-4 w-4" />
+              Docentes
+            </a>
+            <a 
+              href="#" 
+              onClick={handleStudentClick}
+              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+            >
+              <GraduationCap className="mr-1 h-4 w-4" />
+              Estudiantes
             </a>
             <div className="relative">
               <button
@@ -90,6 +116,22 @@ const Header: React.FC = () => {
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200"
             >
               Inicio
+            </a>
+            <a 
+              href="#" 
+              onClick={handleTeacherClick}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200 flex items-center"
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Docentes
+            </a>
+            <a 
+              href="#" 
+              onClick={handleStudentClick}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200 flex items-center"
+            >
+              <GraduationCap className="mr-2 h-4 w-4" />
+              Estudiantes
             </a>
             {helpItems.map((item, index) => (
               <a
