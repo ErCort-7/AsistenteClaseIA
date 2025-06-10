@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import MainLayout from './layouts/MainLayout';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Generator from './pages/Generator';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentGuide from './pages/StudentGuide';
 
-type PageType = 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide';
+type PageType = 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
+  const [currentPage, setCurrentPage] = useState<PageType>('landing');
 
   // Simple routing mechanism
   const renderPage = () => {
     switch (currentPage) {
+      case 'landing':
+        return <LandingPage />;
       case 'dashboard':
         return <Dashboard />;
       case 'generate':
@@ -22,7 +25,7 @@ function App() {
       case 'student-guide':
         return <StudentGuide />;
       default:
-        return <Dashboard />;
+        return <LandingPage />;
     }
   };
 
@@ -38,8 +41,10 @@ function App() {
           setCurrentPage('student-dashboard');
         } else if (path === '/student-guide') {
           setCurrentPage('student-guide');
-        } else if (path === '/dashboard' || path === '/') {
+        } else if (path === '/dashboard') {
           setCurrentPage('dashboard');
+        } else if (path === '/') {
+          setCurrentPage('landing');
         }
       } else {
         originalConsoleLog(message, ...args);
@@ -50,6 +55,11 @@ function App() {
       console.log = originalConsoleLog;
     };
   }, []);
+
+  // Show landing page without layout, others with layout
+  if (currentPage === 'landing') {
+    return <LandingPage />;
+  }
 
   return (
     <MainLayout>

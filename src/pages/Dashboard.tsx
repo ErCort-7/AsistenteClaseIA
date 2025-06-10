@@ -2,7 +2,7 @@ import React from 'react';
 import HistoryCard from '../components/Dashboard/HistoryCard';
 import StatisticsCard from '../components/Dashboard/StatisticsCard';
 import { useNavigate } from '../hooks/useNavigate';
-import { Users, GraduationCap, BookOpen, FileText } from 'lucide-react';
+import { BookOpen, FileText, Plus } from 'lucide-react';
 
 const EXAMPLE_CLASSES = [
   {
@@ -52,85 +52,68 @@ const Dashboard: React.FC = () => {
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Bienvenido a <span className="text-[#1a365d]">EduAsistent</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Tu plataforma integral para crear contenido educativo de calidad
-          </p>
-          
-          {/* Role Selection Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-            <div 
-              onClick={() => navigateTo('/dashboard')}
-              className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-8 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-            >
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mx-auto mb-4">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-blue-900 mb-3">Para Docentes</h3>
-              <p className="text-blue-700 mb-4">
-                Crea guiones de clase, presentaciones y material complementario
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Panel de Docentes
+              </h1>
+              <p className="text-lg text-gray-600">
+                Gestiona y crea contenido educativo de calidad
               </p>
-              <div className="flex justify-center space-x-4 text-sm text-blue-600">
-                <span className="flex items-center">
-                  <FileText className="h-4 w-4 mr-1" />
-                  Guiones
-                </span>
-                <span className="flex items-center">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  Presentaciones
-                </span>
-              </div>
             </div>
-            
-            <div 
-              onClick={() => navigateTo('/student-dashboard')}
-              className="bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-xl p-8 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-            >
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4">
-                <GraduationCap className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-purple-900 mb-3">Para Estudiantes</h3>
-              <p className="text-purple-700 mb-4">
-                Genera guías de estudio personalizadas para mejorar tu aprendizaje
-              </p>
-              <div className="flex justify-center space-x-4 text-sm text-purple-600">
-                <span className="flex items-center">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  Guías PDF
-                </span>
-                <span className="flex items-center">
-                  <FileText className="h-4 w-4 mr-1" />
-                  Personalizadas
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Teacher Dashboard Content */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Panel de Docentes</h2>
             <button 
               onClick={() => navigateTo('/generate')}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center"
+              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             >
+              <Plus className="mr-2 h-5 w-5" />
               Crear Nuevo Contenido
             </button>
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div 
+            onClick={() => navigateTo('/generate')}
+            className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-blue-600 rounded-full p-3">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="ml-3 text-xl font-bold text-blue-900">Generar Guión de Clase</h3>
+            </div>
+            <p className="text-blue-700">
+              Crea guiones detallados con objetivos, desarrollo y actividades
+            </p>
+          </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <HistoryCard items={EXAMPLE_CLASSES} onSelectItem={handleSelectItem} />
+          <div 
+            onClick={() => navigateTo('/generate')}
+            className="bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+          >
+            <div className="flex items-center mb-4">
+              <div className="bg-purple-600 rounded-full p-3">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="ml-3 text-xl font-bold text-purple-900">Crear Presentación</h3>
             </div>
-            
-            <div>
-              <StatisticsCard totalClasses={12} totalPresentations={8} />
-            </div>
+            <p className="text-purple-700">
+              Genera presentaciones estructuradas y material complementario
+            </p>
+          </div>
+        </div>
+        
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <HistoryCard items={EXAMPLE_CLASSES} onSelectItem={handleSelectItem} />
+          </div>
+          
+          <div>
+            <StatisticsCard totalClasses={12} totalPresentations={8} />
           </div>
         </div>
       </div>

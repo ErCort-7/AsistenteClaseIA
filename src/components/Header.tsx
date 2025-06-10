@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Menu, X, HelpCircle, GraduationCap, Users } from 'lucide-react';
+import { Sparkles, Menu, X, HelpCircle, GraduationCap, Users, Home } from 'lucide-react';
 import { useNavigation } from '../hooks/useNavigation';
 import { useNavigate } from '../hooks/useNavigate';
 
@@ -49,8 +49,9 @@ const Header: React.FC = () => {
             <a 
               href="#" 
               onClick={handleHomeClick}
-              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200"
+              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
             >
+              <Home className="mr-1 h-4 w-4" />
               Inicio
             </a>
             <a 
@@ -113,8 +114,9 @@ const Header: React.FC = () => {
             <a 
               href="#" 
               onClick={handleHomeClick}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-[#1a365d]/10 hover:text-[#1a365d] transition-colors duration-200 flex items-center"
             >
+              <Home className="mr-2 h-4 w-4" />
               Inicio
             </a>
             <a 
