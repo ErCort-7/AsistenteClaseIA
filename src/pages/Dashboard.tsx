@@ -1,8 +1,11 @@
 import React from 'react';
 import HistoryCard from '../components/Dashboard/HistoryCard';
 import StatisticsCard from '../components/Dashboard/StatisticsCard';
-import { useNavigate } from '../hooks/useNavigate';
 import { BookOpen, FileText, Plus } from 'lucide-react';
+
+interface DashboardProps {
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
 
 const EXAMPLE_CLASSES = [
   {
@@ -28,24 +31,24 @@ const EXAMPLE_CLASSES = [
   },
 ];
 
-const Dashboard: React.FC = () => {
-  const { navigateTo } = useNavigate();
-  
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const handleSelectItem = (id: string) => {
     const selectedClass = EXAMPLE_CLASSES.find(item => item.id === id);
     if (selectedClass) {
-      navigateTo('/generate');
+      onNavigate('generate');
       // Simulate clicking the generate button with the example class data
-      const event = new CustomEvent('generateExample', {
-        detail: {
-          tema: selectedClass.topic,
-          materia: selectedClass.subject.toLowerCase(),
-          gradoAcademico: selectedClass.gradeLevel.toLowerCase().replace('º de ', '-'),
-          duracion: '60',
-          tipoClase: 'teorica'
-        }
-      });
-      document.dispatchEvent(event);
+      setTimeout(() => {
+        const event = new CustomEvent('generateExample', {
+          detail: {
+            tema: selectedClass.topic,
+            materia: selectedClass.subject.toLowerCase().replace(' ', '-'),
+            gradoAcademico: selectedClass.gradeLevel.toLowerCase().replace('º de ', '-'),
+            duracion: '60',
+            tipoClase: 'teorica'
+          }
+        });
+        document.dispatchEvent(event);
+      }, 100);
     }
   };
   
@@ -64,7 +67,7 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             <button 
-              onClick={() => navigateTo('/generate')}
+              onClick={() => onNavigate('generate')}
               className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Plus className="mr-2 h-5 w-5" />
@@ -76,7 +79,7 @@ const Dashboard: React.FC = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div 
-            onClick={() => navigateTo('/generate')}
+            onClick={() => onNavigate('generate')}
             className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">
@@ -91,7 +94,7 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div 
-            onClick={() => navigateTo('/generate')}
+            onClick={() => onNavigate('generate')}
             className="bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">

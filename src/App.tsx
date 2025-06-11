@@ -15,54 +15,27 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
-        return <LandingPage />;
+        return <LandingPage onNavigate={setCurrentPage} />;
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentPage} />;
       case 'generate':
-        return <Generator />;
+        return <Generator onNavigate={setCurrentPage} />;
       case 'student-dashboard':
-        return <StudentDashboard />;
+        return <StudentDashboard onNavigate={setCurrentPage} />;
       case 'student-guide':
-        return <StudentGuide />;
+        return <StudentGuide onNavigate={setCurrentPage} />;
       default:
-        return <LandingPage />;
+        return <LandingPage onNavigate={setCurrentPage} />;
     }
   };
 
-  // Override the useNavigate hook for this demo
-  React.useEffect(() => {
-    const originalConsoleLog = console.log;
-    console.log = (message: any, ...args: any[]) => {
-      if (typeof message === 'string' && message.startsWith('Navigation to ')) {
-        const path = message.replace('Navigation to ', '');
-        if (path === '/generate') {
-          setCurrentPage('generate');
-        } else if (path === '/student-dashboard') {
-          setCurrentPage('student-dashboard');
-        } else if (path === '/student-guide') {
-          setCurrentPage('student-guide');
-        } else if (path === '/dashboard') {
-          setCurrentPage('dashboard');
-        } else if (path === '/') {
-          setCurrentPage('landing');
-        }
-      } else {
-        originalConsoleLog(message, ...args);
-      }
-    };
-
-    return () => {
-      console.log = originalConsoleLog;
-    };
-  }, []);
-
   // Show landing page without layout, others with layout
   if (currentPage === 'landing') {
-    return <LandingPage />;
+    return renderPage();
   }
 
   return (
-    <MainLayout>
+    <MainLayout currentPage={currentPage} onNavigate={setCurrentPage}>
       {renderPage()}
     </MainLayout>
   );

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import TopicForm from '../components/Generator/TopicForm';
 import ContentDisplay from '../components/Generator/ContentDisplay';
 
+interface GeneratorProps {
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
+
 const GUION_ENDPOINT = '/api/minedaiagente/guion';
 const PRESENTACION_ENDPOINT = '/api/minedaiagente/presentacion';
 const ENLACES_ENDPOINT = '/api/enlaces';
@@ -32,7 +36,7 @@ El contenido debe estar pensado para cubrir el tiempo de duración especificada 
 y las actividades deben ser empáticas al tipo de clase (${tipoClase === 'teorica' ? 'teórica' : 'práctica'}), con un enfoque pedagógico que facilite la comprensión del tema.`;
 };
 
-const Generator: React.FC = () => {
+const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentTopic, setCurrentTopic] = useState('');
   const [generatedContent, setGeneratedContent] = useState<{

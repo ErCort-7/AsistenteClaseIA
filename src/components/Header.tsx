@@ -1,11 +1,14 @@
 import React from 'react';
 import { Sparkles, Menu, X, HelpCircle, GraduationCap, Users, Home } from 'lucide-react';
 import { useNavigation } from '../hooks/useNavigation';
-import { useNavigate } from '../hooks/useNavigate';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  currentPage: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide';
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
   const { isMenuOpen, toggleMenu } = useNavigation();
-  const { navigateTo } = useNavigate();
   const [showHelpMenu, setShowHelpMenu] = React.useState(false);
 
   const helpItems = [
@@ -15,22 +18,22 @@ const Header: React.FC = () => {
   ];
 
   const handleLogoClick = () => {
-    navigateTo('/');
+    onNavigate('landing');
   };
 
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigateTo('/');
+    onNavigate('landing');
   };
 
   const handleTeacherClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigateTo('/dashboard');
+    onNavigate('dashboard');
   };
 
   const handleStudentClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigateTo('/student-dashboard');
+    onNavigate('student-dashboard');
   };
 
   return (
@@ -49,7 +52,11 @@ const Header: React.FC = () => {
             <a 
               href="#" 
               onClick={handleHomeClick}
-              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+              className={`px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center ${
+                currentPage === 'landing' 
+                  ? 'text-[#1a365d] border-b-2 border-[#1a365d]' 
+                  : 'text-gray-700 hover:text-[#1a365d]'
+              }`}
             >
               <Home className="mr-1 h-4 w-4" />
               Inicio
@@ -57,7 +64,11 @@ const Header: React.FC = () => {
             <a 
               href="#" 
               onClick={handleTeacherClick}
-              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+              className={`px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center ${
+                currentPage === 'dashboard' || currentPage === 'generate'
+                  ? 'text-[#1a365d] border-b-2 border-[#1a365d]' 
+                  : 'text-gray-700 hover:text-[#1a365d]'
+              }`}
             >
               <Users className="mr-1 h-4 w-4" />
               Docentes
@@ -65,7 +76,11 @@ const Header: React.FC = () => {
             <a 
               href="#" 
               onClick={handleStudentClick}
-              className="text-gray-700 hover:text-[#1a365d] px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+              className={`px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center ${
+                currentPage === 'student-dashboard' || currentPage === 'student-guide'
+                  ? 'text-[#1a365d] border-b-2 border-[#1a365d]' 
+                  : 'text-gray-700 hover:text-[#1a365d]'
+              }`}
             >
               <GraduationCap className="mr-1 h-4 w-4" />
               Estudiantes

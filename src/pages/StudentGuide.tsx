@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import StudentForm from '../components/Student/StudentForm';
 import StudyGuideDisplay from '../components/Student/StudyGuideDisplay';
 
+interface StudentGuideProps {
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
+
 const STUDENT_GUIDE_ENDPOINT = '/api/minedaiagente/guia-estudiante';
 
 const formatStudentPrompt = (
@@ -54,7 +58,7 @@ La guía debe incluir:
 La guía debe estar adaptada al nivel académico especificado y ser apropiada para el tipo de estudio solicitado (${tipoEstudio}).`;
 };
 
-const StudentGuide: React.FC = () => {
+const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentTopic, setCurrentTopic] = useState('');
   const [generatedGuide, setGeneratedGuide] = useState<string | null>(null);

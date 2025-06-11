@@ -1,16 +1,17 @@
 import React from 'react';
 import { Users, GraduationCap, BookOpen, FileText, Sparkles } from 'lucide-react';
-import { useNavigate } from '../hooks/useNavigate';
 
-const LandingPage: React.FC = () => {
-  const { navigateTo } = useNavigate();
+interface LandingPageProps {
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
 
+const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const handleTeacherClick = () => {
-    navigateTo('/dashboard');
+    onNavigate('dashboard');
   };
 
   const handleStudentClick = () => {
-    navigateTo('/student-dashboard');
+    onNavigate('student-dashboard');
   };
 
   return (

@@ -1,7 +1,10 @@
 import React from 'react';
 import StudentHistoryCard from '../components/Dashboard/StudentHistoryCard';
 import StatisticsCard from '../components/Dashboard/StatisticsCard';
-import { useNavigate } from '../hooks/useNavigate';
+
+interface StudentDashboardProps {
+  onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
+}
 
 const EXAMPLE_STUDENT_GUIDES = [
   {
@@ -30,24 +33,24 @@ const EXAMPLE_STUDENT_GUIDES = [
   },
 ];
 
-const StudentDashboard: React.FC = () => {
-  const { navigateTo } = useNavigate();
-  
+const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }) => {
   const handleSelectItem = (id: string) => {
     const selectedGuide = EXAMPLE_STUDENT_GUIDES.find(item => item.id === id);
     if (selectedGuide) {
-      navigateTo('/student-guide');
+      onNavigate('student-guide');
       // Simulate clicking the generate button with the example guide data
-      const event = new CustomEvent('generateStudentExample', {
-        detail: {
-          tema: selectedGuide.topic,
-          materia: selectedGuide.subject.toLowerCase(),
-          gradoAcademico: selectedGuide.gradeLevel.toLowerCase().replace('º de ', '-'),
-          duracion: '60',
-          tipoEstudio: selectedGuide.studyType
-        }
-      });
-      document.dispatchEvent(event);
+      setTimeout(() => {
+        const event = new CustomEvent('generateStudentExample', {
+          detail: {
+            tema: selectedGuide.topic,
+            materia: selectedGuide.subject.toLowerCase().replace(' ', '-'),
+            gradoAcademico: selectedGuide.gradeLevel.toLowerCase().replace('º de ', '-'),
+            duracion: '60',
+            tipoEstudio: selectedGuide.studyType
+          }
+        });
+        document.dispatchEvent(event);
+      }, 100);
     }
   };
   
@@ -61,7 +64,7 @@ const StudentDashboard: React.FC = () => {
         
         <div className="flex justify-center mb-8">
           <button 
-            onClick={() => navigateTo('/student-guide')}
+            onClick={() => onNavigate('student-guide')}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg transition-all duration-200 flex items-center font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Crear Nueva Guía de Estudio
