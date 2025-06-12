@@ -6,7 +6,7 @@ interface StudentGuideProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
 }
 
-const STUDENT_GUIDE_ENDPOINT = '/api/minedaiagente/guia-estudiante';
+const STUDENT_GUIDE_ENDPOINT = '/api/minedaiagente/guion';
 
 const formatStudentPrompt = (
   tema: string,
