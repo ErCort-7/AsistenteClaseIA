@@ -102,39 +102,87 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
         })
       ]);
 
-      if (!guionResponse.ok || !presentacionResponse.ok || !enlacesResponse.ok) {
-        console.error('Guion Response Status:', guionResponse.status);
-        console.error('Presentacion Response Status:', presentacionResponse.status);
-        console.error('Enlaces Response Status:', enlacesResponse.status);
-        
+      // Handle each response independently
+      let guionContent = null;
+      let presentacionContent = null;
+      let ejerciciosContent = null;
+
+      // Process Guion response
+      if (guionResponse.ok) {
         try {
-          const guionErrorData = await guionResponse.text();
-          const presentacionErrorData = await presentacionResponse.text();
-          const enlacesErrorData = await enlacesResponse.text();
-          console.error('Guion Response Error:', guionErrorData);
-          console.error('Presentacion Response Error:', presentacionErrorData);
-          console.error('Enlaces Response Error:', enlacesErrorData);
-        } catch (parseError) {
-          console.error('Error parsing error responses:', parseError);
+          const guionData = await guionResponse.json();
+          if (guionData.response) {
+            guionContent = guionData.response;
+          } else {
+            guionContent = 'Error: Respuesta del servidor incompleta para el guión.';
+          }
+        } catch (error) {
+          console.error('Error parsing guion response:', error);
+          guionContent = 'Error: No se pudo procesar la respuesta del guión.';
         }
-        
-        throw new Error(`Error en la respuesta del servidor: Guion (${guionResponse.status}), Presentación (${presentacionResponse.status}), Enlaces (${enlacesResponse.status})`);
+      } else {
+        console.error('Guion Response Status:', guionResponse.status);
+        try {
+          const errorData = await guionResponse.text();
+          console.error('Guion Response Error:', errorData);
+        } catch (parseError) {
+          console.error('Error parsing guion error response:', parseError);
+        }
+        guionContent = `Error: No se pudo generar el guión (${guionResponse.status}). Por favor, intente nuevamente.`;
       }
 
-      const [guionData, presentacionData, enlacesData] = await Promise.all([
-        guionResponse.json(),
-        presentacionResponse.json(),
-        enlacesResponse.json()
-      ]);
+      // Process Presentacion response
+      if (presentacionResponse.ok) {
+        try {
+          const presentacionData = await presentacionResponse.json();
+          if (presentacionData.response) {
+            presentacionContent = presentacionData.response;
+          } else {
+            presentacionContent = 'Error: Respuesta del servidor incompleta para la presentación.';
+          }
+        } catch (error) {
+          console.error('Error parsing presentacion response:', error);
+          presentacionContent = 'Error: No se pudo procesar la respuesta de la presentación.';
+        }
+      } else {
+        console.error('Presentacion Response Status:', presentacionResponse.status);
+        try {
+          const errorData = await presentacionResponse.text();
+          console.error('Presentacion Response Error:', errorData);
+        } catch (parseError) {
+          console.error('Error parsing presentacion error response:', parseError);
+        }
+        presentacionContent = `Error: No se pudo generar la presentación (${presentacionResponse.status}). Por favor, intente nuevamente.`;
+      }
 
-      if (!guionData.response || !presentacionData.response || !enlacesData.response) {
-        throw new Error('Respuesta del servidor incompleta o inválida');
+      // Process Enlaces response
+      if (enlacesResponse.ok) {
+        try {
+          const enlacesData = await enlacesResponse.json();
+          if (enlacesData.response) {
+            ejerciciosContent = `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesData.response}`;
+          } else {
+            ejerciciosContent = 'Error: Respuesta del servidor incompleta para los recursos complementarios.';
+          }
+        } catch (error) {
+          console.error('Error parsing enlaces response:', error);
+          ejerciciosContent = 'Error: No se pudo procesar la respuesta de los recursos complementarios.';
+        }
+      } else {
+        console.error('Enlaces Response Status:', enlacesResponse.status);
+        try {
+          const errorData = await enlacesResponse.text();
+          console.error('Enlaces Response Error:', errorData);
+        } catch (parseError) {
+          console.error('Error parsing enlaces error response:', parseError);
+        }
+        ejerciciosContent = `Error: No se pudieron generar los recursos complementarios (${enlacesResponse.status}). Este servicio podría estar temporalmente no disponible.`;
       }
       
       setGeneratedContent({
-        guion: guionData.response,
-        presentacion: presentacionData.response,
-        ejercicios: `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesData.response}`,
+        guion: guionContent,
+        presentacion: presentacionContent,
+        ejercicios: ejerciciosContent,
       });
     } catch (error) {
       console.error('Error completo al generar contenido:', error);
@@ -144,9 +192,9 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
         : 'Error desconocido al generar el contenido';
         
       setGeneratedContent({
-        guion: `Error: ${errorMessage}. Por favor, intente nuevamente.`,
-        presentacion: null,
-        ejercicios: null,
+        guion: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
+        presentacion: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
+        ejercicios: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
       });
     } finally {
       setIsGenerating(false);
