@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import StudentForm from '../components/Student/StudentForm';
 import StudyGuideDisplay from '../components/Student/StudyGuideDisplay';
+import { API_CONFIG } from '../config/api';
 
 interface StudentGuideProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
 }
-
-const STUDENT_GUIDE_ENDPOINT = '/api/minedaiagente/guion';
 
 const formatStudentPrompt = (
   tema: string,
@@ -90,7 +89,7 @@ const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {
     try {
       const prompt = formatStudentPrompt(tema, materia, gradoAcademico, duracion, tipoEstudio);
       
-      const response = await fetch(STUDENT_GUIDE_ENDPOINT, {
+      const response = await fetch(API_CONFIG.GUION_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

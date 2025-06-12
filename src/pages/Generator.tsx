@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import TopicForm from '../components/Generator/TopicForm';
 import ContentDisplay from '../components/Generator/ContentDisplay';
+import { API_CONFIG } from '../config/api';
 
 interface GeneratorProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
 }
-
-const GUION_ENDPOINT = '/api/minedaiagente/guion';
-const PRESENTACION_ENDPOINT = '/api/minedaiagente/presentacion';
-const ENLACES_ENDPOINT = '/api/enlaces';
 
 const formatPrompt = (
   tema: string,
@@ -82,21 +79,21 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
       
       // Fetch all content in parallel
       const [guionResponse, presentacionResponse, enlacesResponse] = await Promise.all([
-        fetch(GUION_ENDPOINT, {
+        fetch(API_CONFIG.GUION_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ prompt }),
         }),
-        fetch(PRESENTACION_ENDPOINT, {
+        fetch(API_CONFIG.PRESENTACION_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ prompt }),
         }),
-        fetch(ENLACES_ENDPOINT, {
+        fetch(API_CONFIG.ENLACES_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
