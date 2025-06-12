@@ -14,11 +14,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/minedaiagente/, ''),
       },
-      '/api/enlaces': {
-        target: 'https://enlaces-127465468754.us-central1.run.app',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/enlaces/, ''),
-      },
     },
   },
 });

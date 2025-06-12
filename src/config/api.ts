@@ -11,6 +11,6 @@ export const API_CONFIG = {
     : 'https://minedaiagente-127465468754.europe-west1.run.app/presentacion',
   
   ENLACES_ENDPOINT: isDevelopment 
-    ? '/api/enlaces'
-    : 'https://enlaces-127465468754.us-central1.run.app'
+    ? '/api/minedaiagente/enlaces'
+    : 'https://minedaiagente-127465468754.europe-west1.run.app/enlaces'
 };
