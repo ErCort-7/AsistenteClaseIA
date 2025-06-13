@@ -98,7 +98,7 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ input: `Tema: ${tema}` }),
+          body: JSON.stringify({ prompt: `Tema: ${tema}` }),
         })
       ]);
 
