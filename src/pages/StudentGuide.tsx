@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StudentForm from '../components/Student/StudentForm';
 import StudyGuideDisplay from '../components/Student/StudyGuideDisplay';
-import { API_CONFIG } from '../config/api';
+import { API_CONFIG, makeApiRequest, handleApiError } from '../config/api';
 
 interface StudentGuideProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
@@ -89,25 +89,11 @@ const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {
     try {
       const prompt = formatStudentPrompt(tema, materia, gradoAcademico, duracion, tipoEstudio);
       
-      const response = await fetch(API_CONFIG.GUION_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
+      const response = await makeApiRequest(API_CONFIG.GUION_ENDPOINT, { prompt });
 
       if (!response.ok) {
-        console.error('Student Guide Response Status:', response.status);
-        
-        try {
-          const errorData = await response.text();
-          console.error('Student Guide Response Error:', errorData);
-        } catch (parseError) {
-          console.error('Error parsing error response:', parseError);
-        }
-        
-        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+        const statusText = response.statusText || 'Error del servidor';
+        throw new Error(`Error ${response.status}: ${statusText}`);
       }
 
       const data = await response.json();
@@ -120,11 +106,8 @@ const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {
     } catch (error) {
       console.error('Error completo al generar guía de estudio:', error);
       
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Error desconocido al generar la guía de estudio';
-        
-      setGeneratedGuide(`Error: ${errorMessage}. Por favor, intente nuevamente.`);
+      const errorMessage = handleApiError(error, 'generación de guía de estudio');
+      setGeneratedGuide(errorMessage);
     } finally {
       setIsGenerating(false);
     }

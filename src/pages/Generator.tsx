@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TopicForm from '../components/Generator/TopicForm';
 import ContentDisplay from '../components/Generator/ContentDisplay';
-import { API_CONFIG } from '../config/api';
+import { API_CONFIG, makeApiRequest, handleApiError } from '../config/api';
 
 interface GeneratorProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
@@ -59,6 +59,27 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
     };
   }, []);
 
+  const generateContent = async (endpoint: string, prompt: any, contentType: string) => {
+    try {
+      const response = await makeApiRequest(endpoint, { prompt });
+
+      if (!response.ok) {
+        const statusText = response.statusText || 'Error del servidor';
+        throw new Error(`Error ${response.status}: ${statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.response) {
+        throw new Error('Respuesta del servidor incompleta');
+      }
+
+      return data.response;
+    } catch (error) {
+      return handleApiError(error, contentType);
+    }
+  };
+
   const handleGenerate = async (
     tema: string,
     materia: string,
@@ -77,124 +98,44 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
     try {
       const prompt = formatPrompt(tema, materia, gradoAcademico, duracion, tipoClase);
       
-      // Fetch all content in parallel
-      const [guionResponse, presentacionResponse, enlacesResponse] = await Promise.all([
-        fetch(API_CONFIG.GUION_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt }),
-        }),
-        fetch(API_CONFIG.PRESENTACION_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt }),
-        }),
-        fetch(API_CONFIG.ENLACES_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt: `Tema: ${tema}` }),
-        })
-      ]);
-
-      // Handle each response independently
-      let guionContent = null;
-      let presentacionContent = null;
-      let ejerciciosContent = null;
-
-      // Process Guion response
-      if (guionResponse.ok) {
-        try {
-          const guionData = await guionResponse.json();
-          if (guionData.response) {
-            guionContent = guionData.response;
-          } else {
-            guionContent = 'Error: Respuesta del servidor incompleta para el guión.';
-          }
-        } catch (error) {
-          console.error('Error parsing guion response:', error);
-          guionContent = 'Error: No se pudo procesar la respuesta del guión.';
-        }
-      } else {
-        console.error('Guion Response Status:', guionResponse.status);
-        try {
-          const errorData = await guionResponse.text();
-          console.error('Guion Response Error:', errorData);
-        } catch (parseError) {
-          console.error('Error parsing guion error response:', parseError);
-        }
-        guionContent = `Error: No se pudo generar el guión (${guionResponse.status}). Por favor, intente nuevamente.`;
-      }
-
-      // Process Presentacion response
-      if (presentacionResponse.ok) {
-        try {
-          const presentacionData = await presentacionResponse.json();
-          if (presentacionData.response) {
-            presentacionContent = presentacionData.response;
-          } else {
-            presentacionContent = 'Error: Respuesta del servidor incompleta para la presentación.';
-          }
-        } catch (error) {
-          console.error('Error parsing presentacion response:', error);
-          presentacionContent = 'Error: No se pudo procesar la respuesta de la presentación.';
-        }
-      } else {
-        console.error('Presentacion Response Status:', presentacionResponse.status);
-        try {
-          const errorData = await presentacionResponse.text();
-          console.error('Presentacion Response Error:', errorData);
-        } catch (parseError) {
-          console.error('Error parsing presentacion error response:', parseError);
-        }
-        presentacionContent = `Error: No se pudo generar la presentación (${presentacionResponse.status}). Por favor, intente nuevamente.`;
-      }
-
-      // Process Enlaces response
-      if (enlacesResponse.ok) {
-        try {
-          const enlacesData = await enlacesResponse.json();
-          if (enlacesData.response) {
-            ejerciciosContent = `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesData.response}`;
-          } else {
-            ejerciciosContent = 'Error: Respuesta del servidor incompleta para los recursos complementarios.';
-          }
-        } catch (error) {
-          console.error('Error parsing enlaces response:', error);
-          ejerciciosContent = 'Error: No se pudo procesar la respuesta de los recursos complementarios.';
-        }
-      } else {
-        console.error('Enlaces Response Status:', enlacesResponse.status);
-        try {
-          const errorData = await enlacesResponse.text();
-          console.error('Enlaces Response Error:', errorData);
-        } catch (parseError) {
-          console.error('Error parsing enlaces error response:', parseError);
-        }
-        ejerciciosContent = `Error: No se pudieron generar los recursos complementarios (${enlacesResponse.status}). Este servicio podría estar temporalmente no disponible.`;
-      }
+      // Generate content sequentially to avoid overwhelming the server
+      const guionContent = await generateContent(
+        API_CONFIG.GUION_ENDPOINT, 
+        prompt, 
+        'generación de guión'
+      );
       
-      setGeneratedContent({
-        guion: guionContent,
-        presentacion: presentacionContent,
-        ejercicios: ejerciciosContent,
-      });
+      setGeneratedContent(prev => ({ ...prev, guion: guionContent }));
+
+      const presentacionContent = await generateContent(
+        API_CONFIG.PRESENTACION_ENDPOINT, 
+        prompt, 
+        'generación de presentación'
+      );
+      
+      setGeneratedContent(prev => ({ ...prev, presentacion: presentacionContent }));
+
+      const enlacesContent = await generateContent(
+        API_CONFIG.ENLACES_ENDPOINT, 
+        `Tema: ${tema}`, 
+        'generación de recursos complementarios'
+      );
+      
+      const formattedEnlacesContent = enlacesContent.startsWith('Error') 
+        ? enlacesContent 
+        : `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesContent}`;
+      
+      setGeneratedContent(prev => ({ ...prev, ejercicios: formattedEnlacesContent }));
+
     } catch (error) {
       console.error('Error completo al generar contenido:', error);
       
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Error desconocido al generar el contenido';
+      const errorMessage = handleApiError(error, 'generación de contenido');
         
       setGeneratedContent({
-        guion: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
-        presentacion: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
-        ejercicios: `Error de conexión: ${errorMessage}. Por favor, verifique su conexión a internet e intente nuevamente.`,
+        guion: errorMessage,
+        presentacion: errorMessage,
+        ejercicios: errorMessage,
       });
     } finally {
       setIsGenerating(false);
