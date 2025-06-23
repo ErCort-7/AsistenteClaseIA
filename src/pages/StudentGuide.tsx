@@ -89,7 +89,8 @@ const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {
     try {
       const prompt = formatStudentPrompt(tema, materia, gradoAcademico, duracion, tipoEstudio);
       
-      const response = await makeApiRequest(API_CONFIG.GUION_ENDPOINT, { prompt });
+      // Usar el nuevo endpoint específico para guías de estudiante
+      const response = await makeApiRequest(API_CONFIG.ALUMNO_GUIA_ENDPOINT, { prompt });
 
       if (!response.ok) {
         const statusText = response.statusText || 'Error del servidor';

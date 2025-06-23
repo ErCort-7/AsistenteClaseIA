@@ -12,7 +12,11 @@ export const API_CONFIG = {
   
   ENLACES_ENDPOINT: isDevelopment 
     ? '/api/minedaiagente/enlaces'
-    : 'https://minedaiagente-127465468754.europe-west1.run.app/enlaces'
+    : 'https://minedaiagente-127465468754.europe-west1.run.app/enlaces',
+  
+  ALUMNO_GUIA_ENDPOINT: isDevelopment 
+    ? '/api/minedaiagente/alumnoguia'
+    : 'https://minedaiagente-127465468754.europe-west1.run.app/alumnoguia'
 };
 
 // API utility functions
