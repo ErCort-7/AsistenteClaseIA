@@ -33,13 +33,32 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
     }
   };
 
+  const formatTextWithBold = (text: string) => {
+    // Dividir el texto por los asteriscos dobles
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remover los asteriscos y aplicar negrita
+        const boldText = part.slice(2, -2);
+        return (
+          <strong key={index} className="font-bold text-gray-900">
+            {boldText}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
   const parseStudyGuide = () => {
     if (!content) return null;
 
+    // Dividir por secciones numeradas, pero mantener los saltos de línea originales
     const sections = content.split(/(?=\d+\.\s+[A-ZÁÉÍÓÚÑ\s]+)/g).filter(section => section.trim());
     
     return sections.map((section, index) => {
-      const lines = section.split('\n').filter(line => line.trim());
+      const lines = section.split('\n');
       if (lines.length === 0) return null;
 
       const titleLine = lines[0];
@@ -90,14 +109,17 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
               <BookOpen className={`h-5 w-5 ${iconColor}`} />
             </div>
             <h3 className="ml-3 text-lg font-bold text-gray-800">
-              {titleLine.replace(/^\d+\.\s*/, '')}
+              {formatTextWithBold(titleLine.replace(/^\d+\.\s*/, ''))}
             </h3>
           </div>
           
           <div className="space-y-3">
             {contentLines.map((line, lineIndex) => {
               const cleanLine = line.trim();
-              if (!cleanLine) return null;
+              if (!cleanLine) {
+                // Respetar líneas vacías como espaciado
+                return <div key={lineIndex} className="h-2"></div>;
+              }
               
               // Handle different types of content
               if (cleanLine.startsWith('- ') || cleanLine.startsWith('• ')) {
@@ -105,7 +127,7 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
                   <div key={lineIndex} className="flex items-start">
                     <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                     <p className="text-gray-700 leading-relaxed">
-                      {cleanLine.replace(/^[-•]\s*/, '')}
+                      {formatTextWithBold(cleanLine.replace(/^[-•]\s*/, ''))}
                     </p>
                   </div>
                 );
@@ -116,7 +138,7 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
                       {cleanLine.match(/^\d+\./)?.[0]}
                     </span>
                     <p className="text-gray-700 leading-relaxed">
-                      {cleanLine.replace(/^\d+\.\s*/, '')}
+                      {formatTextWithBold(cleanLine.replace(/^\d+\.\s*/, ''))}
                     </p>
                   </div>
                 );
@@ -124,14 +146,14 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
                 const [label, ...rest] = cleanLine.split(':');
                 return (
                   <div key={lineIndex} className="bg-white rounded-lg p-3 border border-gray-200">
-                    <span className="font-semibold text-gray-800">{label}:</span>
-                    <span className="text-gray-700 ml-1">{rest.join(':')}</span>
+                    <span className="font-semibold text-gray-800">{formatTextWithBold(label)}:</span>
+                    <span className="text-gray-700 ml-1">{formatTextWithBold(rest.join(':'))}</span>
                   </div>
                 );
               } else {
                 return (
                   <p key={lineIndex} className="text-gray-700 leading-relaxed">
-                    {cleanLine}
+                    {formatTextWithBold(cleanLine)}
                   </p>
                 );
               }
@@ -184,9 +206,13 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
               </div>
             ) : (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 max-h-96 overflow-auto">
-                <pre className="whitespace-pre-line text-sm text-gray-700 font-mono">
-                  {content}
-                </pre>
+                <div className="whitespace-pre-line text-sm text-gray-700 font-mono">
+                  {content.split('\n').map((line, index) => (
+                    <div key={index}>
+                      {formatTextWithBold(line)}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             

@@ -12,7 +12,7 @@ const parseStudyGuideContent = (content: string) => {
   });
 
   sections.forEach(section => {
-    const lines = section.split('\n').filter(line => line.trim());
+    const lines = section.split('\n');
     if (lines.length === 0) return;
 
     const titleLine = lines[0];
@@ -25,10 +25,26 @@ const parseStudyGuideContent = (content: string) => {
       level: 1
     });
 
-    // Process content lines
+    // Process content lines - mantener saltos de línea originales
     let currentList: string[] = [];
     
     contentLines.forEach(line => {
+      // No hacer trim aquí para preservar líneas vacías
+      if (line === '') {
+        // Si hay una línea vacía, agregar espacio
+        if (currentList.length > 0) {
+          elements.push({
+            type: 'list',
+            items: [...currentList]
+          });
+          currentList = [];
+        }
+        elements.push({
+          type: 'space'
+        });
+        return;
+      }
+
       const cleanLine = line.trim();
       if (!cleanLine) return;
 
@@ -72,6 +88,7 @@ const parseStudyGuideContent = (content: string) => {
 };
 
 const createFormattedText = (text: string): TextRun[] => {
+  // Dividir por asteriscos dobles para manejar negritas
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map(part => {
     if (part.startsWith('**') && part.endsWith('**')) {
@@ -111,14 +128,7 @@ export const generateStudyGuidePdf = async (content: string, filename: string) =
 
       case 'heading':
         children.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: element.content,
-              bold: true,
-              size: 28,
-              color: '2d3748'
-            })
-          ],
+          children: createFormattedText(element.content),
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 360, after: 240 },
           thematicBreak: true
@@ -137,16 +147,8 @@ export const generateStudyGuidePdf = async (content: string, filename: string) =
         const [term, ...definition] = element.content.split(':');
         children.push(new Paragraph({
           children: [
-            new TextRun({
-              text: term + ': ',
-              bold: true,
-              size: 24,
-              color: '4a5568'
-            }),
-            new TextRun({
-              text: definition.join(':'),
-              size: 24
-            })
+            ...createFormattedText(term + ': '),
+            ...createFormattedText(definition.join(':'))
           ],
           spacing: { before: 120, after: 120 },
           indent: { left: 360 }
@@ -158,14 +160,22 @@ export const generateStudyGuidePdf = async (content: string, filename: string) =
           children.push(new Paragraph({
             children: [
               new TextRun({
-                text: `• ${item}`,
+                text: `• `,
                 size: 24
-              })
+              }),
+              ...createFormattedText(item)
             ],
             spacing: { before: 60, after: 60 },
             indent: { left: 720 }
           }));
         });
+        break;
+
+      case 'space':
+        children.push(new Paragraph({
+          text: '',
+          spacing: { before: 120, after: 120 }
+        }));
         break;
     }
   });

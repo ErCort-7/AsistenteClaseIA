@@ -31,6 +31,7 @@ const parseContent = (content: string) => {
 };
 
 const createFormattedText = (text: string): TextRun[] => {
+  // Dividir por asteriscos dobles para manejar negritas
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map(part => {
     if (part.startsWith('**') && part.endsWith('**')) {
@@ -69,7 +70,7 @@ export const generateDocx = async (content: string, filename: string) => {
   const children = elements.map(element => {
     if (element.type === 'heading') {
       return new Paragraph({
-        text: element.content,
+        children: createFormattedText(element.content),
         heading: HeadingLevel.HEADING_1,
         spacing: { before: 240, after: 120 },
         thematicBreak: true
@@ -116,7 +117,8 @@ export const generatePptx = async (content: string, filename: string) => {
   
   slides.forEach((slideContent, index) => {
     const slide = pres.addSlide();
-    const [title, ...content] = slideContent.split('\n');
+    const lines = slideContent.split('\n');
+    const [title, ...content] = lines;
 
     const bgColor = index % 3 === 0 ? colors.primary : 
                    index % 3 === 1 ? colors.secondary : colors.accent1;
@@ -133,7 +135,10 @@ export const generatePptx = async (content: string, filename: string) => {
       }
     };
     
-    slide.addText(title.replace('Diapositiva ', ''), {
+    // Procesar título con formato de negritas
+    const titleText = title.replace('Diapositiva ', '').replace(/\*\*(.*?)\*\*/g, '$1');
+    
+    slide.addText(titleText, {
       x: 0.5,
       y: 0.5,
       w: '95%',
@@ -160,15 +165,18 @@ export const generatePptx = async (content: string, filename: string) => {
       const isListItem = line.startsWith('- ');
       const textContent = isListItem ? line.substring(2) : line;
       
+      // Remover asteriscos dobles para PowerPoint (no soporta formato inline)
+      const cleanText = textContent.replace(/\*\*(.*?)\*\*/g, '$1');
+      
       const baseSize = isSubtitle ? 26 : 20;
-      const textLength = textContent.length;
+      const textLength = cleanText.length;
       const dynamicSize = Math.min(
         baseSize,
         textLength > 100 ? baseSize * 0.8 :
         textLength > 80 ? baseSize * 0.9 : baseSize
       );
 
-      slide.addText(textContent, {
+      slide.addText(cleanText, {
         x: 0.5,
         y: currentY,
         w: '95%',
@@ -236,12 +244,12 @@ export const generatePdf = async (content: string, filename: string) => {
       properties: {},
       children: [
         new Paragraph({
-          text: "Recursos Educativos Complementarios",
+          children: createFormattedText("Recursos Educativos Complementarios"),
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 240, after: 120 }
         }),
         new Paragraph({
-          text: "Enlaces recomendados para profundizar en el tema:",
+          children: createFormattedText("Enlaces recomendados para profundizar en el tema:"),
           spacing: { before: 120, after: 240 }
         }),
         ...links.map(link => new Paragraph({

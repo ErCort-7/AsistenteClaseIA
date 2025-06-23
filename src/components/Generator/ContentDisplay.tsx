@@ -55,9 +55,28 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
     }
   };
 
+  const formatTextWithBold = (text: string) => {
+    // Dividir el texto por los asteriscos dobles
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remover los asteriscos y aplicar negrita
+        const boldText = part.slice(2, -2);
+        return (
+          <strong key={index} className="font-bold text-gray-900">
+            {boldText}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
   const renderScriptPreview = () => {
     if (!content) return null;
 
+    // Dividir por párrafos dobles, pero mantener saltos de línea simples
     const sections = content.split('\n\n').filter(section => section.trim());
     
     return (
@@ -65,21 +84,24 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
         {sections.map((section, index) => {
           const lines = section.split('\n');
           const title = lines[0];
-          const content = lines.slice(1).join('\n');
+          const content = lines.slice(1);
           
           return (
             <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold text-indigo-600 mb-3">
-                {title}
+                {formatTextWithBold(title)}
               </h3>
               <div className="prose prose-indigo max-w-none">
-                {content.split('\n').map((paragraph, pIndex) => {
-                  const cleanParagraph = paragraph.replace(/^[-•] /, '').trim();
-                  if (!cleanParagraph) return null;
+                {content.map((line, pIndex) => {
+                  const cleanLine = line.replace(/^[-•] /, '').trim();
+                  if (!cleanLine) {
+                    // Respetar líneas vacías
+                    return <div key={pIndex} className="h-2"></div>;
+                  }
                   
                   return (
                     <p key={pIndex} className="text-gray-700 leading-relaxed mb-2">
-                      {cleanParagraph}
+                      {formatTextWithBold(cleanLine)}
                     </p>
                   );
                 })}
@@ -99,16 +121,25 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
     return (
       <div className="space-y-4">
         {slides.map((slide, index) => {
-          const [title, ...content] = slide.split('\n');
+          const lines = slide.split('\n');
+          const [title, ...content] = lines;
           return (
             <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
-              <h3 className="font-bold text-lg mb-2">{title.replace('Diapositiva ', '')}</h3>
+              <h3 className="font-bold text-lg mb-2">
+                {formatTextWithBold(title.replace('Diapositiva ', ''))}
+              </h3>
               <div className="space-y-2">
-                {content.map((line, i) => (
-                  <p key={i} className="text-sm">
-                    {line.startsWith('- ') ? line.substring(2) : line}
-                  </p>
-                ))}
+                {content.map((line, i) => {
+                  if (!line.trim()) {
+                    return <div key={i} className="h-1"></div>;
+                  }
+                  const cleanLine = line.startsWith('- ') ? line.substring(2) : line;
+                  return (
+                    <p key={i} className="text-sm">
+                      {formatTextWithBold(cleanLine)}
+                    </p>
+                  );
+                })}
               </div>
             </div>
           );
@@ -212,7 +243,13 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
             ) : type === 'ejercicios' ? (
               renderResourceLinks()
             ) : (
-              <pre className="whitespace-pre-line">{content}</pre>
+              <div className="whitespace-pre-line">
+                {content.split('\n').map((line, index) => (
+                  <div key={index}>
+                    {formatTextWithBold(line)}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
           
