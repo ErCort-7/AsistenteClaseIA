@@ -1,7 +1,6 @@
 import React from 'react';
 import HistoryCard from '../components/Dashboard/HistoryCard';
-import StatisticsCard from '../components/Dashboard/StatisticsCard';
-import { BookOpen, FileText, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface DashboardProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
@@ -76,48 +75,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div 
-            onClick={() => onNavigate('generate')}
-            className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-          >
-            <div className="flex items-center mb-4">
-              <div className="bg-blue-600 rounded-full p-3">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="ml-3 text-xl font-bold text-blue-900">Generar Guión de Clase</h3>
-            </div>
-            <p className="text-blue-700">
-              Crea guiones detallados con objetivos, desarrollo y actividades
-            </p>
-          </div>
-          
-          <div 
-            onClick={() => onNavigate('generate')}
-            className="bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-          >
-            <div className="flex items-center mb-4">
-              <div className="bg-purple-600 rounded-full p-3">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="ml-3 text-xl font-bold text-purple-900">Crear Presentación</h3>
-            </div>
-            <p className="text-purple-700">
-              Genera presentaciones estructuradas y material complementario
-            </p>
-          </div>
-        </div>
-        
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <HistoryCard items={EXAMPLE_CLASSES} onSelectItem={handleSelectItem} />
-          </div>
-          
-          <div>
-            <StatisticsCard totalClasses={12} totalPresentations={8} />
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <HistoryCard items={EXAMPLE_CLASSES} onSelectItem={handleSelectItem} />
         </div>
       </div>
     </div>
