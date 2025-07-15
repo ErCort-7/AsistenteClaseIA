@@ -1,6 +1,5 @@
 import React from 'react';
 import StudentHistoryCard from '../components/Dashboard/StudentHistoryCard';
-import StatisticsCard from '../components/Dashboard/StatisticsCard';
 
 interface StudentDashboardProps {
   onNavigate: (page: 'landing' | 'dashboard' | 'generate' | 'student-dashboard' | 'student-guide') => void;
@@ -71,14 +70,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }) => {
           </button>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <StudentHistoryCard items={EXAMPLE_STUDENT_GUIDES} onSelectItem={handleSelectItem} />
-          </div>
-          
-          <div>
-            <StatisticsCard totalClasses={15} totalPresentations={12} />
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <StudentHistoryCard items={EXAMPLE_STUDENT_GUIDES} onSelectItem={handleSelectItem} />
         </div>
       </div>
     </div>
