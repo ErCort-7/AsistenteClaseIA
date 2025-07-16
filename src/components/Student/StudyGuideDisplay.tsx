@@ -54,15 +54,15 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
   const parseStudyGuide = () => {
     if (!content) return null;
 
-    // Dividir por secciones numeradas, pero mantener los saltos de línea originales
-    const sections = content.split(/(?=\d+\.\s+[A-ZÁÉÍÓÚÑ\s]+)/g).filter(section => section.trim());
+    // Dividir por secciones numeradas de manera más flexible
+    const sections = content.split(/(?=^\d+\.\s+)/gm).filter(section => section.trim());
     
     return sections.map((section, index) => {
       const lines = section.split('\n');
       if (lines.length === 0) return null;
 
       const titleLine = lines[0];
-      const contentLines = lines.slice(1);
+      const contentLines = lines.slice(1).filter(line => line !== undefined);
       
       // Determine section type based on title
       let sectionType = 'default';
@@ -157,6 +157,18 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
                   </p>
                 );
               }
+            })}
+            
+            {/* Mostrar contenido adicional que no se procesó en las líneas anteriores */}
+            {section.split('\n').slice(contentLines.length + 1).map((extraLine, extraIndex) => {
+              const cleanExtraLine = extraLine.trim();
+              if (!cleanExtraLine) return <div key={`extra-${extraIndex}`} className="h-2"></div>;
+              
+              return (
+                <p key={`extra-${extraIndex}`} className="text-gray-700 leading-relaxed">
+                  {formatTextWithBold(cleanExtraLine)}
+                </p>
+              );
             })}
           </div>
         </div>

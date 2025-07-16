@@ -76,15 +76,15 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
   const renderScriptPreview = () => {
     if (!content) return null;
 
-    // Dividir por párrafos dobles, pero mantener saltos de línea simples
-    const sections = content.split('\n\n').filter(section => section.trim());
+    // Dividir por párrafos dobles de manera más robusta
+    const sections = content.split(/\n\s*\n/).filter(section => section.trim());
     
     return (
       <div className="space-y-6">
         {sections.map((section, index) => {
-          const lines = section.split('\n');
+          const lines = section.split('\n').filter(line => line !== undefined);
           const title = lines[0];
-          const content = lines.slice(1);
+          const sectionContent = lines.slice(1);
           
           return (
             <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
@@ -92,7 +92,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                 {formatTextWithBold(title)}
               </h3>
               <div className="prose prose-indigo max-w-none">
-                {content.map((line, pIndex) => {
+                {sectionContent.map((line, pIndex) => {
                   const cleanLine = line.replace(/^[-•] /, '').trim();
                   if (!cleanLine) {
                     // Respetar líneas vacías
@@ -105,6 +105,22 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                     </p>
                   );
                 })}
+                
+                {/* Asegurar que no se pierda contenido adicional */}
+                {section.includes('\n') && section.split('\n').length > sectionContent.length + 1 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded border-l-4 border-indigo-400">
+                    <p className="text-sm text-gray-600 font-medium mb-2">Contenido adicional:</p>
+                    {section.split('\n').slice(sectionContent.length + 1).map((extraLine, extraIndex) => {
+                      const cleanExtraLine = extraLine.trim();
+                      if (!cleanExtraLine) return null;
+                      return (
+                        <p key={`extra-${extraIndex}`} className="text-gray-700 text-sm leading-relaxed">
+                          {formatTextWithBold(cleanExtraLine)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -116,12 +132,12 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
   const renderPresentationPreview = () => {
     if (!content) return null;
 
-    const slides = content.split('\n\n').filter(slide => slide.trim());
+    const slides = content.split(/\n\s*\n/).filter(slide => slide.trim());
     
     return (
       <div className="space-y-4">
         {slides.map((slide, index) => {
-          const lines = slide.split('\n');
+          const lines = slide.split('\n').filter(line => line !== undefined);
           const [title, ...content] = lines;
           return (
             <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
@@ -140,6 +156,21 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                     </p>
                   );
                 })}
+                
+                {/* Verificar si hay contenido adicional no procesado */}
+                {slide.split('\n').length > content.length + 1 && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    {slide.split('\n').slice(content.length + 1).map((extraLine, extraIndex) => {
+                      const cleanExtraLine = extraLine.trim();
+                      if (!cleanExtraLine) return null;
+                      return (
+                        <p key={`slide-extra-${extraIndex}`} className="text-sm text-gray-600">
+                          {formatTextWithBold(cleanExtraLine)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );
