@@ -76,15 +76,25 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
   const renderScriptPreview = () => {
     if (!content) return null;
 
-    // Dividir por párrafos dobles de manera más robusta
-    const sections = content.split(/\n\s*\n/).filter(section => section.trim());
+    // Dividir por secciones usando headers de markdown (# ## ###) o líneas que parecen títulos
+    const sections = content.split(/(?=^#{1,3}\s+|\n\s*\n(?=[A-ZÁÉÍÓÚÑ][^.\n]*:?\s*$))/gm).filter(section => section.trim());
     
     return (
       <div className="space-y-6">
         {sections.map((section, index) => {
-          const lines = section.split('\n').filter(line => line !== undefined);
-          const title = lines[0];
-          const sectionContent = lines.slice(1);
+          const lines = section.split('\n');
+          let title = lines[0];
+          let sectionContent = lines.slice(1);
+          
+          // Si es un header de markdown, limpiar los #
+          if (title.startsWith('#')) {
+            title = title.replace(/^#+\s*/, '');
+          }
+          
+          // Filtrar líneas vacías al inicio del contenido
+          while (sectionContent.length > 0 && !sectionContent[0].trim()) {
+            sectionContent = sectionContent.slice(1);
+          }
           
           return (
             <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
@@ -92,27 +102,156 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                 {formatTextWithBold(title)}
               </h3>
               <div className="prose prose-indigo max-w-none">
-                {sectionContent.map((line, pIndex) => {
-                  const cleanLine = line.replace(/^[-•] /, '').trim();
-                  if (!cleanLine) {
-                    // Respetar líneas vacías
-                    return <div key={pIndex} className="h-2"></div>;
+                {sectionContent.map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  
+                  // Líneas vacías
+                  if (!trimmedLine) {
+                    return <div key={lineIndex} className="h-2"></div>;
                   }
                   
+                  // Headers secundarios (##, ###)
+                  if (trimmedLine.match(/^#{2,3}\s+/)) {
+                    return (
+                      <h4 key={lineIndex} className="text-md font-semibold text-gray-800 mt-4 mb-2">
+                        {formatTextWithBold(trimmedLine.replace(/^#+\s*/, ''))}
+                      </h4>
+                    );
+                  }
+                  
+                  // Listas con - o *
+                  if (trimmedLine.match(/^[-*]\s+/)) {
+                    return (
+                      <div key={lineIndex} className="flex items-start mb-2">
+                        <span className="text-indigo-600 mr-2 mt-1">•</span>
+                        <p className="text-gray-700 leading-relaxed">
+                          {formatTextWithBold(trimmedLine.replace(/^[-*]\s+/, ''))}
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  // Listas numeradas
+                  if (trimmedLine.match(/^\d+\.\s+/)) {
+                    const number = trimmedLine.match(/^(\d+)\./)?.[1];
+                    return (
+                      <div key={lineIndex} className="flex items-start mb-2">
+                        <span className="text-indigo-600 mr-2 mt-1 font-medium">{number}.</span>
+                        <p className="text-gray-700 leading-relaxed">
+                          {formatTextWithBold(trimmedLine.replace(/^\d+\.\s+/, ''))}
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  // Texto normal
                   return (
-                    <p key={pIndex} className="text-gray-700 leading-relaxed mb-2">
-                      {formatTextWithBold(cleanLine)}
+                    <p key={lineIndex} className="text-gray-700 leading-relaxed mb-2">
+                      {formatTextWithBold(trimmedLine)}
                     </p>
                   );
                 })}
-                
-                {/* Asegurar que no se pierda contenido adicional */}
-                {section.includes('\n') && section.split('\n').length > sectionContent.length + 1 && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded border-l-4 border-indigo-400">
-                    <p className="text-sm text-gray-600 font-medium mb-2">Contenido adicional:</p>
-                    {section.split('\n').slice(sectionContent.length + 1).map((extraLine, extraIndex) => {
-                      const cleanExtraLine = extraLine.trim();
-                      if (!cleanExtraLine) return null;
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderPresentationPreview = () => {
+    if (!content) return null;
+
+    // Dividir por diapositivas usando headers o patrones de diapositiva
+    const slides = content.split(/(?=^#{1,2}\s+|\n\s*(?:Diapositiva|Slide)\s*\d+|\n\s*\n(?=[A-ZÁÉÍÓÚÑ][^.\n]*:?\s*$))/gm).filter(slide => slide.trim());
+    
+    return (
+      <div className="space-y-4">
+        {slides.map((slide, index) => {
+          const lines = slide.split('\n').filter(line => line !== undefined);
+          let title = lines[0];
+          let slideContent = lines.slice(1);
+          
+          // Limpiar headers de markdown
+          if (title.startsWith('#')) {
+            title = title.replace(/^#+\s*/, '');
+          }
+          
+          // Remover "Diapositiva X:" del título si existe
+          title = title.replace(/^(?:Diapositiva|Slide)\s*\d+:?\s*/i, '');
+          
+          // Filtrar líneas vacías al inicio
+          while (slideContent.length > 0 && !slideContent[0].trim()) {
+            slideContent = slideContent.slice(1);
+          }
+          
+          return (
+            <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
+              <div className="flex items-center mb-3">
+                <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium mr-2">
+                  Diapositiva {index + 1}
+                </span>
+                <h3 className="font-bold text-lg text-gray-800">
+                  {formatTextWithBold(title)}
+                </h3>
+              </div>
+              
+              <div className="space-y-2">
+                {slideContent.map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  
+                  if (!trimmedLine) {
+                    return <div key={lineIndex} className="h-1"></div>;
+                  }
+                  
+                  // Headers secundarios
+                  if (trimmedLine.match(/^#{2,3}\s+/)) {
+                    return (
+                      <h4 key={lineIndex} className="font-semibold text-md text-gray-800 mt-3 mb-1">
+                        {formatTextWithBold(trimmedLine.replace(/^#+\s*/, ''))}
+                      </h4>
+                    );
+                  }
+                  
+                  // Listas
+                  if (trimmedLine.match(/^[-*]\s+/)) {
+                    return (
+                      <div key={lineIndex} className="flex items-start">
+                        <span className="text-purple-600 mr-2 mt-1">•</span>
+                        <p className="text-sm text-gray-700">
+                          {formatTextWithBold(trimmedLine.replace(/^[-*]\s+/, ''))}
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  // Listas numeradas
+                  if (trimmedLine.match(/^\d+\.\s+/)) {
+                    const number = trimmedLine.match(/^(\d+)\./)?.[1];
+                    return (
+                      <div key={lineIndex} className="flex items-start">
+                        <span className="text-purple-600 mr-2 mt-1 font-medium text-sm">{number}.</span>
+                        <p className="text-sm text-gray-700">
+                          {formatTextWithBold(trimmedLine.replace(/^\d+\.\s+/, ''))}
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  // Texto normal
+                  return (
+                    <p key={lineIndex} className="text-sm text-gray-700">
+                      {formatTextWithBold(trimmedLine)}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
                       return (
                         <p key={`extra-${extraIndex}`} className="text-gray-700 text-sm leading-relaxed">
                           {formatTextWithBold(cleanExtraLine)}

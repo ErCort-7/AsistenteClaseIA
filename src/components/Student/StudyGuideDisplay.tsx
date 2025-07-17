@@ -54,15 +54,25 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
   const parseStudyGuide = () => {
     if (!content) return null;
 
-    // Dividir por secciones numeradas de manera más flexible
-    const sections = content.split(/(?=^\d+\.\s+)/gm).filter(section => section.trim());
+    // Dividir por secciones usando headers de markdown o secciones numeradas
+    const sections = content.split(/(?=^#{1,3}\s+|^\d+\.\s+[A-ZÁÉÍÓÚÑ])/gm).filter(section => section.trim());
     
     return sections.map((section, index) => {
-      const lines = section.split('\n');
+      const lines = section.split('\n').filter(line => line !== undefined);
       if (lines.length === 0) return null;
 
-      const titleLine = lines[0];
-      const contentLines = lines.slice(1).filter(line => line !== undefined);
+      let titleLine = lines[0];
+      let contentLines = lines.slice(1);
+      
+      // Limpiar headers de markdown
+      if (titleLine.startsWith('#')) {
+        titleLine = titleLine.replace(/^#+\s*/, '');
+      }
+      
+      // Filtrar líneas vacías al inicio del contenido
+      while (contentLines.length > 0 && !contentLines[0].trim()) {
+        contentLines = contentLines.slice(1);
+      }
       
       // Determine section type based on title
       let sectionType = 'default';
@@ -116,53 +126,82 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
           <div className="space-y-3">
             {contentLines.map((line, lineIndex) => {
               const cleanLine = line.trim();
+              
               if (!cleanLine) {
-                // Respetar líneas vacías como espaciado
                 return <div key={lineIndex} className="h-2"></div>;
               }
               
-              // Handle different types of content
-              if (cleanLine.startsWith('- ') || cleanLine.startsWith('• ')) {
+              // Headers secundarios (##, ###)
+              if (cleanLine.match(/^#{2,3}\s+/)) {
+                return (
+                  <h4 key={lineIndex} className="text-md font-semibold text-gray-800 mt-4 mb-2 border-b border-gray-200 pb-1">
+                    {formatTextWithBold(cleanLine.replace(/^#+\s*/, ''))}
+                  </h4>
+                );
+              }
+              
+              // Listas con - o * o •
+              if (cleanLine.match(/^[-*•]\s+/)) {
                 return (
                   <div key={lineIndex} className="flex items-start">
                     <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                     <p className="text-gray-700 leading-relaxed">
-                      {formatTextWithBold(cleanLine.replace(/^[-•]\s*/, ''))}
+                      {formatTextWithBold(cleanLine.replace(/^[-*•]\s*/, ''))}
                     </p>
                   </div>
                 );
-              } else if (cleanLine.match(/^\d+\./)) {
+              }
+              
+              // Listas numeradas
+              if (cleanLine.match(/^\d+\.\s+/)) {
+                const number = cleanLine.match(/^(\d+)\./)?.[1];
                 return (
                   <div key={lineIndex} className="flex items-start">
-                    <span className="text-sm font-semibold text-gray-500 mr-3 mt-0.5">
-                      {cleanLine.match(/^\d+\./)?.[0]}
+                    <span className="text-sm font-semibold text-indigo-600 mr-3 mt-0.5 min-w-[1.5rem]">
+                      {number}.
                     </span>
                     <p className="text-gray-700 leading-relaxed">
                       {formatTextWithBold(cleanLine.replace(/^\d+\.\s*/, ''))}
                     </p>
                   </div>
                 );
-              } else if (cleanLine.includes(':') && cleanLine.length < 100) {
+              }
+              
+              // Definiciones (texto con : y longitud corta)
+              if (cleanLine.includes(':') && cleanLine.length < 100 && !cleanLine.match(/^https?:/)) {
                 const [label, ...rest] = cleanLine.split(':');
                 return (
                   <div key={lineIndex} className="bg-white rounded-lg p-3 border border-gray-200">
-                    <span className="font-semibold text-gray-800">{formatTextWithBold(label)}:</span>
-                    <span className="text-gray-700 ml-1">{formatTextWithBold(rest.join(':'))}</span>
+                    <span className="font-semibold text-indigo-700">{formatTextWithBold(label.trim())}:</span>
+                    <span className="text-gray-700 ml-1">{formatTextWithBold(rest.join(':').trim())}</span>
                   </div>
                 );
-              } else {
-                return (
-                  <p key={lineIndex} className="text-gray-700 leading-relaxed">
-                    {formatTextWithBold(cleanLine)}
-                  </p>
-                );
               }
+              
+              // Texto normal
+              return (
+                <p key={lineIndex} className="text-gray-700 leading-relaxed">
+                  {formatTextWithBold(cleanLine)}
+                </p>
+              );
             })}
             
-            {/* Mostrar contenido adicional que no se procesó en las líneas anteriores */}
+            {/* Procesar cualquier contenido adicional que no se haya incluido */}
             {section.split('\n').slice(contentLines.length + 1).map((extraLine, extraIndex) => {
               const cleanExtraLine = extraLine.trim();
-              if (!cleanExtraLine) return <div key={`extra-${extraIndex}`} className="h-2"></div>;
+              if (!cleanExtraLine) return <div key={`extra-space-${extraIndex}`} className="h-2"></div>;
+              
+              // Aplicar el mismo procesamiento a las líneas extra
+              if (cleanExtraLine.match(/^[-*•]\s+/)) {
+                return (
+                  <div key={`extra-${extraIndex}`} className="flex items-start">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {formatTextWithBold(cleanExtraLine.replace(/^[-*•]\s*/, ''))}
+                    </p>
+                  </div>
+                );
+              }
               
               return (
                 <p key={`extra-${extraIndex}`} className="text-gray-700 leading-relaxed">
