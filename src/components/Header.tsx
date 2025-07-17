@@ -44,7 +44,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
             className="flex items-center cursor-pointer" 
             onClick={handleLogoClick}
           >
-            <Sparkles className="h-8 w-8 text-[#1a365d]" />
+            <img 
+              src="https://innova.innovacion.gob.sv/assets/SecretariaLogoBlanco-Dha94oyW.png" 
+              alt="Secretaría de Innovación" 
+              className="h-8 w-auto"
+            />
             <span className="ml-2 text-xl font-semibold text-[#1a365d]">EduAsistent</span>
           </div>
           

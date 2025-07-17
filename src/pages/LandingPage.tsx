@@ -20,8 +20,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         {/* Logo and Title */}
         <div className="mb-12">
           <div className="flex items-center justify-center mb-6">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full p-4 shadow-lg">
-              <Sparkles className="h-12 w-12 text-white" />
+            <div className="bg-white rounded-full p-4 shadow-lg">
+              <img 
+                src="https://innova.innovacion.gob.sv/assets/SecretariaLogoBlanco-Dha94oyW.png" 
+                alt="Secretaría de Innovación" 
+                className="h-12 w-auto"
+              />
             </div>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
