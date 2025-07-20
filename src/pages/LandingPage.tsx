@@ -20,7 +20,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         {/* Logo and Title */}
         <div className="mb-12">
           <div className="flex items-center justify-center mb-6">
-            <div className="bg-white rounded-full p-4 shadow-lg">
+            <div className="bg-[#1a365d] rounded-full p-4 shadow-lg">
               <img 
                 src="https://innova.innovacion.gob.sv/assets/SecretariaLogoBlanco-Dha94oyW.png" 
                 alt="Secretaría de Innovación" 
