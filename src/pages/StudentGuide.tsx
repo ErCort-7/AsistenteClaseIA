@@ -14,47 +14,19 @@ const formatStudentPrompt = (
   duracion: string,
   tipoEstudio: 'repaso' | 'examen' | 'comprension'
 ) => {
-  const nivelEducativo = gradoAcademico.replace('-', 'º de ');
+  // Convertir el grado académico al formato esperado por la API
+  const nivelEducativo = gradoAcademico.includes('-') 
+    ? gradoAcademico.replace('-', 'º de ').replace(/(\d+)º de (.+)/, '$2')
+    : gradoAcademico;
   
-  return `Tema: ${tema}
-Nivel: ${nivelEducativo}
-Tipo de estudio: ${tipoEstudio === 'repaso' ? 'Repaso general' : tipoEstudio === 'examen' ? 'Preparación para examen' : 'Comprensión profunda'}
-Tiempo de estudio: ${duracion} minutos
-
-Genera una guía de estudio completa y estructurada para un estudiante de ${nivelEducativo} sobre el tema "${tema}".
-
-La guía debe incluir:
-
-1. RESUMEN EJECUTIVO
-- Conceptos clave del tema
-- Objetivos de aprendizaje
-- Tiempo estimado de estudio
-
-2. CONTENIDO TEÓRICO
-- Definiciones importantes
-- Explicaciones claras y detalladas
-- Ejemplos prácticos
-- Diagramas conceptuales (descritos en texto)
-
-3. TÉCNICAS DE ESTUDIO RECOMENDADAS
-- Métodos de memorización
-- Estrategias de comprensión
-- Técnicas de repaso
-
-4. EJERCICIOS PRÁCTICOS
-- Preguntas de autoevaluación
-- Problemas resueltos paso a paso
-- Ejercicios para practicar
-
-5. RECURSOS ADICIONALES
-- Sugerencias de material complementario
-- Tips para el estudio efectivo
-
-6. PLAN DE ESTUDIO
-- Cronograma sugerido para ${duracion} minutos
-- Distribución del tiempo por sección
-
-La guía debe estar adaptada al nivel académico especificado y ser apropiada para el tipo de estudio solicitado (${tipoEstudio}).`;
+  // Convertir materia al formato legible
+  const materiaFormateada = materia.replace('-', ' ').replace(/^\w/, c => c.toUpperCase());
+  
+  // Convertir tipo de estudio
+  const tipoEstudioFormateado = tipoEstudio === 'repaso' ? 'Repaso' : 
+                               tipoEstudio === 'examen' ? 'Examen' : 'Teórica';
+  
+  return `Tema: ${tema}\nNivel: ${nivelEducativo}\nTipo de clase: ${tipoEstudioFormateado}\nMateria: ${materiaFormateada}`;
 };
 
 const StudentGuide: React.FC<StudentGuideProps> = ({ onNavigate }) => {

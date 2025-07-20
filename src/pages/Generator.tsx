@@ -17,23 +17,18 @@ const formatPrompt = (
   duracion: string,
   tipoClase: 'teorica' | 'practica'
 ) => {
-  // Convertir el grado académico al formato esperado
-  const nivelEducativo = gradoAcademico.replace('-', 'º de ');
+  // Convertir el grado académico al formato esperado por la API
+  const nivelEducativo = gradoAcademico.includes('-') 
+    ? gradoAcademico.replace('-', 'º de ').replace(/(\d+)º de (.+)/, '$2')
+    : gradoAcademico;
   
-  return `Tema: ${tema}
-Nivel: ${nivelEducativo}
-Tipo de clase: ${tipoClase === 'teorica' ? 'Teórica' : 'Práctica'}
-Duración: ${duracion} minutos
-
-Ejemplo: genera un guion de clase completo para una clase ${tipoClase === 'teorica' ? 'teórica' : 'práctica'} sobre ${tema}, adaptado al nivel de ${nivelEducativo}.
-
-El guion debe incluir definiciones detalladas, contenidos desarrollados y explicaciones claras y adecuadas para ese nivel.
-
-Además, debe contener la estructura completa de la clase, incluyendo objetivos, desarrollo de contenidos, ejemplos, actividades y cierre.
-
-El contenido debe estar pensado para cubrir el tiempo de duración especificada (${duracion} minutos),
-
-y las actividades deben ser empáticas al tipo de clase (${tipoClase === 'teorica' ? 'teórica' : 'práctica'}), con un enfoque pedagógico que facilite la comprensión del tema.`;
+  // Convertir materia al formato legible
+  const materiaFormateada = materia.replace('-', ' ').replace(/^\w/, c => c.toUpperCase());
+  
+  // Convertir tipo de clase
+  const tipoClaseFormateado = tipoClase === 'teorica' ? 'Teórica' : 'Práctica';
+  
+  return `Tema: ${tema}\nNivel: ${nivelEducativo}\nTipo de clase: ${tipoClaseFormateado}\nDuración: ${duracion} minutos\nMateria: ${materiaFormateada}`;
 };
 
 const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
@@ -100,12 +95,12 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
     });
 
     try {
-      const prompt = formatPrompt(tema, materia, gradoAcademico, duracion, tipoClase);
+      const basePrompt = formatPrompt(tema, materia, gradoAcademico, duracion, tipoClase);
       
       // Generate content sequentially to avoid overwhelming the server
       const guionContent = await generateContent(
         API_CONFIG.GUION_ENDPOINT, 
-        prompt, 
+        basePrompt, 
         'generación de guión'
       );
       
@@ -113,23 +108,20 @@ const Generator: React.FC<GeneratorProps> = ({ onNavigate }) => {
 
       const presentacionContent = await generateContent(
         API_CONFIG.PRESENTACION_ENDPOINT, 
-        prompt, 
+        basePrompt, 
         'generación de presentación'
       );
       
       setGeneratedContent(prev => ({ ...prev, presentacion: presentacionContent }));
 
+      // Para enlaces solo enviamos el tema
       const enlacesContent = await generateContent(
         API_CONFIG.ENLACES_ENDPOINT, 
-        `Tema: ${tema}`, 
+        `Tema: ${tema}`,
         'generación de recursos complementarios'
       );
       
-      const formattedEnlacesContent = enlacesContent.startsWith('Error') 
-        ? enlacesContent 
-        : `RECURSOS EDUCATIVOS COMPLEMENTARIOS\n\nEnlaces recomendados para profundizar en el tema:\n\n${enlacesContent}`;
-      
-      setGeneratedContent(prev => ({ ...prev, ejercicios: formattedEnlacesContent }));
+      setGeneratedContent(prev => ({ ...prev, ejercicios: enlacesContent }));
 
     } catch (error) {
       console.error('Error completo al generar contenido:', error);
