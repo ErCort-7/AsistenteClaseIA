@@ -123,7 +123,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                   if (trimmedLine.match(/^[-*]\s+/)) {
                     return (
                       <div key={lineIndex} className="flex items-start mb-2">
-                        <span className="text-indigo-600 mr-2 mt-1">•</span>
                         <p className="text-gray-700 leading-relaxed">
                           {formatTextWithBold(trimmedLine.replace(/^[-*]\s+/, ''))}
                         </p>
@@ -217,7 +216,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({ title, content, type, i
                   if (trimmedLine.match(/^[-*]\s+/)) {
                     return (
                       <div key={lineIndex} className="flex items-start">
-                        <span className="text-purple-600 mr-2 mt-1">•</span>
                         <p className="text-sm text-gray-700">
                           {formatTextWithBold(trimmedLine.replace(/^[-*]\s+/, ''))}
                         </p>

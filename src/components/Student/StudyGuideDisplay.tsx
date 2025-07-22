@@ -144,7 +144,6 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
               if (cleanLine.match(/^[-*•]\s+/)) {
                 return (
                   <div key={lineIndex} className="flex items-start">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                     <p className="text-gray-700 leading-relaxed">
                       {formatTextWithBold(cleanLine.replace(/^[-*•]\s*/, ''))}
                     </p>
@@ -195,7 +194,6 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
               if (cleanExtraLine.match(/^[-*•]\s+/)) {
                 return (
                   <div key={`extra-${extraIndex}`} className="flex items-start">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                     <p className="text-gray-700 leading-relaxed">
                       {formatTextWithBold(cleanExtraLine.replace(/^[-*•]\s*/, ''))}
                     </p>
