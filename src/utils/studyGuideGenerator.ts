@@ -1,182 +1,90 @@
 import { Document, Paragraph, TextRun, HeadingLevel, Packer, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
 
-const parseStudyGuideContent = (content: string) => {
-  const sections = content.split(/(?=\d+\.\s+[A-ZÁÉÍÓÚÑ\s]+)/g).filter(section => section.trim());
-  const elements: any[] = [];
-
-  // Add title
-  elements.push({
-    type: 'title',
-    content: 'GUÍA DE ESTUDIO PERSONALIZADA'
-  });
-
-  sections.forEach(section => {
-    const lines = section.split('\n');
-    if (lines.length === 0) return;
-
-    const titleLine = lines[0];
-    const contentLines = lines.slice(1);
-
-    // Add section title
-    elements.push({
-      type: 'heading',
-      content: titleLine.replace(/^\d+\.\s*/, ''),
-      level: 1
-    });
-
-    // Process content lines - mantener saltos de línea originales
-    let currentList: string[] = [];
-    
-    contentLines.forEach(line => {
-      // No hacer trim aquí para preservar líneas vacías
-      if (line === '') {
-        // Si hay una línea vacía, agregar espacio
-        if (currentList.length > 0) {
-          elements.push({
-            type: 'list',
-            items: [...currentList]
-          });
-          currentList = [];
-        }
-        elements.push({
-          type: 'space'
-        });
-        return;
-      }
-
-      const cleanLine = line.trim();
-      if (!cleanLine) return;
-
-      if (cleanLine.startsWith('- ') || cleanLine.startsWith('• ')) {
-        currentList.push(cleanLine.replace(/^[-•]\s*/, ''));
-      } else {
-        // If we have accumulated list items, add them first
-        if (currentList.length > 0) {
-          elements.push({
-            type: 'list',
-            items: [...currentList]
-          });
-          currentList = [];
-        }
-
-        // Add regular paragraph
-        if (cleanLine.includes(':') && cleanLine.length < 100) {
-          elements.push({
-            type: 'definition',
-            content: cleanLine
-          });
-        } else {
-          elements.push({
-            type: 'paragraph',
-            content: cleanLine
-          });
-        }
-      }
-    });
-
-    // Add any remaining list items
-    if (currentList.length > 0) {
-      elements.push({
-        type: 'list',
-        items: currentList
-      });
-    }
-  });
-
-  return elements;
-};
-
-const createFormattedText = (text: string): TextRun[] => {
-  // Dividir por asteriscos dobles para manejar negritas
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map(part => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return new TextRun({
-        text: part.slice(2, -2),
-        bold: true,
-        size: 24
-      });
-    }
-    return new TextRun({
-      text: part,
-      size: 24
-    });
-  });
-};
-
 export const generateStudyGuidePdf = async (content: string, filename: string) => {
-  const elements = parseStudyGuideContent(content);
+  // Procesar el contenido línea por línea de forma simple
+  const lines = content.split('\n');
   const children: Paragraph[] = [];
 
-  elements.forEach(element => {
-    switch (element.type) {
-      case 'title':
-        children.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: element.content,
-              bold: true,
-              size: 32,
-              color: '1a365d'
-            })
-          ],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 480 }
-        }));
-        break;
+  // Agregar título principal
+  children.push(new Paragraph({
+    children: [
+      new TextRun({
+        text: 'GUÍA DE ESTUDIO PERSONALIZADA',
+        bold: true,
+        size: 32,
+        color: '1a365d'
+      })
+    ],
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 0, after: 480 }
+  }));
 
-      case 'heading':
-        children.push(new Paragraph({
-          children: createFormattedText(element.content),
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 360, after: 240 },
-          thematicBreak: true
-        }));
-        break;
+  lines.forEach((line, index) => {
+    const cleanLine = line.trim();
+    
+    // Líneas vacías
+    if (!cleanLine) {
+      children.push(new Paragraph({
+        text: '',
+        spacing: { before: 120, after: 120 }
+      }));
+      return;
+    }
 
-      case 'paragraph':
-        children.push(new Paragraph({
-          children: createFormattedText(element.content),
-          spacing: { before: 120, after: 120 },
-          alignment: AlignmentType.JUSTIFIED
-        }));
-        break;
+    // Limpiar símbolos de markdown
+    let processedLine = cleanLine
+      .replace(/^#+\s*/, '') // Quitar # de headers
+      .replace(/^\d+\.\s*/, '') // Quitar numeración
+      .replace(/^[-*•]\s*/, '') // Quitar viñetas
+      .replace(/\*\*(.*?)\*\*/g, '$1'); // Quitar asteriscos de negritas
 
-      case 'definition':
-        const [term, ...definition] = element.content.split(':');
-        children.push(new Paragraph({
-          children: [
-            ...createFormattedText(term + ': '),
-            ...createFormattedText(definition.join(':'))
-          ],
-          spacing: { before: 120, after: 120 },
-          indent: { left: 360 }
-        }));
-        break;
+    // Determinar si es un título (línea corta sin punto final)
+    const isTitle = processedLine.length < 80 && !processedLine.endsWith('.') && !processedLine.includes(':');
 
-      case 'list':
-        element.items.forEach((item: string, index: number) => {
-          children.push(new Paragraph({
-            children: [
-              new TextRun({
-                text: `• `,
-                size: 24
-              }),
-              ...createFormattedText(item)
-            ],
-            spacing: { before: 60, after: 60 },
-            indent: { left: 720 }
-          }));
-        });
-        break;
-
-      case 'space':
-        children.push(new Paragraph({
-          text: '',
-          spacing: { before: 120, after: 120 }
-        }));
-        break;
+    if (isTitle) {
+      // Título/Encabezado
+      children.push(new Paragraph({
+        children: [
+          new TextRun({
+            text: processedLine,
+            bold: true,
+            size: 28,
+            color: '2d3748'
+          })
+        ],
+        spacing: { before: 360, after: 240 }
+      }));
+    } else if (processedLine.includes(':') && processedLine.length < 150) {
+      // Definición
+      const [term, ...definition] = processedLine.split(':');
+      children.push(new Paragraph({
+        children: [
+          new TextRun({
+            text: term.trim() + ': ',
+            bold: true,
+            size: 24
+          }),
+          new TextRun({
+            text: definition.join(':').trim(),
+            size: 24
+          })
+        ],
+        spacing: { before: 120, after: 120 },
+        alignment: AlignmentType.JUSTIFIED
+      }));
+    } else {
+      // Párrafo normal
+      children.push(new Paragraph({
+        children: [
+          new TextRun({
+            text: processedLine,
+            size: 24
+          })
+        ],
+        spacing: { before: 120, after: 120 },
+        alignment: AlignmentType.JUSTIFIED
+      }));
     }
   });
 

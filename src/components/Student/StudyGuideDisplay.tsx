@@ -54,163 +54,57 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
   const parseStudyGuide = () => {
     if (!content) return null;
 
-    // Dividir por secciones usando headers de markdown o secciones numeradas
-    const sections = content.split(/(?=^#{1,3}\s+|^\d+\.\s+[A-ZÁÉÍÓÚÑ])/gm).filter(section => section.trim());
+    // Procesar todo el contenido como un solo bloque continuo
+    const lines = content.split('\n');
     
-    return sections.map((section, index) => {
-      const lines = section.split('\n').filter(line => line !== undefined);
-      if (lines.length === 0) return null;
-
-      let titleLine = lines[0];
-      let contentLines = lines.slice(1);
-      
-      // Limpiar headers de markdown
-      if (titleLine.startsWith('#')) {
-        titleLine = titleLine.replace(/^#+\s*/, '');
-      }
-      
-      // Filtrar líneas vacías al inicio del contenido
-      while (contentLines.length > 0 && !contentLines[0].trim()) {
-        contentLines = contentLines.slice(1);
-      }
-      
-      // Determine section type based on title
-      let sectionType = 'default';
-      let bgColor = 'bg-gray-50';
-      let borderColor = 'border-gray-200';
-      let iconColor = 'text-gray-600';
-      
-      if (titleLine.toLowerCase().includes('resumen') || titleLine.toLowerCase().includes('conceptos clave')) {
-        sectionType = 'summary';
-        bgColor = 'bg-blue-50';
-        borderColor = 'border-blue-200';
-        iconColor = 'text-blue-600';
-      } else if (titleLine.toLowerCase().includes('contenido') || titleLine.toLowerCase().includes('teórico')) {
-        sectionType = 'theory';
-        bgColor = 'bg-green-50';
-        borderColor = 'border-green-200';
-        iconColor = 'text-green-600';
-      } else if (titleLine.toLowerCase().includes('técnicas') || titleLine.toLowerCase().includes('estudio')) {
-        sectionType = 'techniques';
-        bgColor = 'bg-purple-50';
-        borderColor = 'border-purple-200';
-        iconColor = 'text-purple-600';
-      } else if (titleLine.toLowerCase().includes('ejercicios') || titleLine.toLowerCase().includes('práctica')) {
-        sectionType = 'exercises';
-        bgColor = 'bg-amber-50';
-        borderColor = 'border-amber-200';
-        iconColor = 'text-amber-600';
-      } else if (titleLine.toLowerCase().includes('recursos') || titleLine.toLowerCase().includes('adicionales')) {
-        sectionType = 'resources';
-        bgColor = 'bg-indigo-50';
-        borderColor = 'border-indigo-200';
-        iconColor = 'text-indigo-600';
-      } else if (titleLine.toLowerCase().includes('plan') || titleLine.toLowerCase().includes('cronograma')) {
-        sectionType = 'plan';
-        bgColor = 'bg-rose-50';
-        borderColor = 'border-rose-200';
-        iconColor = 'text-rose-600';
-      }
-
-      return (
-        <div key={index} className={`rounded-xl border-2 ${borderColor} ${bgColor} p-6 shadow-sm hover:shadow-md transition-all duration-200`}>
-          <div className="flex items-center mb-4">
-            <div className={`rounded-full p-2 bg-white shadow-sm`}>
-              <BookOpen className={`h-5 w-5 ${iconColor}`} />
-            </div>
-            <h3 className="ml-3 text-lg font-bold text-gray-800">
-              {formatTextWithBold(titleLine.replace(/^\d+\.\s*/, ''))}
-            </h3>
-          </div>
-          
-          <div className="space-y-3">
-            {contentLines.map((line, lineIndex) => {
-              const cleanLine = line.trim();
-              
-              if (!cleanLine) {
-                return <div key={lineIndex} className="h-2"></div>;
-              }
-              
-              // Headers secundarios (##, ###)
-              if (cleanLine.match(/^#{2,3}\s+/)) {
-                return (
-                  <h4 key={lineIndex} className="text-md font-semibold text-gray-800 mt-4 mb-2 border-b border-gray-200 pb-1">
-                    {formatTextWithBold(cleanLine.replace(/^#+\s*/, ''))}
-                  </h4>
-                );
-              }
-              
-              // Listas con - o * o •
-              if (cleanLine.match(/^[-*•]\s+/)) {
-                return (
-                  <div key={lineIndex} className="flex items-start">
-                    <p className="text-gray-700 leading-relaxed">
-                      {formatTextWithBold(cleanLine.replace(/^[-*•]\s*/, ''))}
-                    </p>
-                  </div>
-                );
-              }
-              
-              // Listas numeradas
-              if (cleanLine.match(/^\d+\.\s+/)) {
-                const number = cleanLine.match(/^(\d+)\./)?.[1];
-                return (
-                  <div key={lineIndex} className="flex items-start">
-                    <span className="text-sm font-semibold text-indigo-600 mr-3 mt-0.5 min-w-[1.5rem]">
-                      {number}.
-                    </span>
-                    <p className="text-gray-700 leading-relaxed">
-                      {formatTextWithBold(cleanLine.replace(/^\d+\.\s*/, ''))}
-                    </p>
-                  </div>
-                );
-              }
-              
-              // Definiciones (texto con : y longitud corta)
-              if (cleanLine.includes(':') && cleanLine.length < 100 && !cleanLine.match(/^https?:/)) {
-                const [label, ...rest] = cleanLine.split(':');
-                return (
-                  <div key={lineIndex} className="bg-white rounded-lg p-3 border border-gray-200">
-                    <span className="font-semibold text-indigo-700">{formatTextWithBold(label.trim())}:</span>
-                    <span className="text-gray-700 ml-1">{formatTextWithBold(rest.join(':').trim())}</span>
-                  </div>
-                );
-              }
-              
-              // Texto normal
-              return (
-                <p key={lineIndex} className="text-gray-700 leading-relaxed">
-                  {formatTextWithBold(cleanLine)}
-                </p>
-              );
-            })}
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+        <div className="prose prose-lg max-w-none">
+          {lines.map((line, index) => {
+            const cleanLine = line.trim();
             
-            {/* Procesar cualquier contenido adicional que no se haya incluido */}
-            {section.split('\n').slice(contentLines.length + 1).map((extraLine, extraIndex) => {
-              const cleanExtraLine = extraLine.trim();
-              if (!cleanExtraLine) return <div key={`extra-space-${extraIndex}`} className="h-2"></div>;
-              
-              // Aplicar el mismo procesamiento a las líneas extra
-              if (cleanExtraLine.match(/^[-*•]\s+/)) {
-                return (
-                  <div key={`extra-${extraIndex}`} className="flex items-start">
-                    <p className="text-gray-700 leading-relaxed">
-                      {formatTextWithBold(cleanExtraLine.replace(/^[-*•]\s*/, ''))}
-                    </p>
-                  </div>
-                );
-              }
-              
+            // Líneas vacías - agregar espacio
+            if (!cleanLine) {
+              return <div key={index} className="h-4"></div>;
+            }
+            
+            // Limpiar símbolos de markdown y numeración
+            let processedLine = cleanLine
+              .replace(/^#+\s*/, '') // Quitar # de headers
+              .replace(/^\d+\.\s*/, '') // Quitar numeración
+              .replace(/^[-*•]\s*/, '') // Quitar viñetas
+              .replace(/\*\*(.*?)\*\*/g, '$1'); // Quitar asteriscos de negritas
+            
+            // Si la línea parece ser un título (corta y sin puntos al final)
+            if (processedLine.length < 80 && !processedLine.endsWith('.') && !processedLine.includes(':')) {
               return (
-                <p key={`extra-${extraIndex}`} className="text-gray-700 leading-relaxed">
-                  {formatTextWithBold(cleanExtraLine)}
-                </p>
+                <h3 key={index} className="text-xl font-bold text-gray-900 mt-6 mb-4 first:mt-0">
+                  {processedLine}
+                </h3>
               );
-            })}
-          </div>
+            }
+            
+            // Si contiene dos puntos, podría ser una definición
+            if (processedLine.includes(':') && processedLine.length < 150) {
+              const [label, ...rest] = processedLine.split(':');
+              return (
+                <div key={index} className="mb-3">
+                  <span className="font-semibold text-indigo-700">{label.trim()}:</span>
+                  <span className="text-gray-700 ml-1">{rest.join(':').trim()}</span>
+                </div>
+              );
+            }
+            
+            // Texto normal
+            return (
+              <p key={index} className="text-gray-700 leading-relaxed mb-3">
+                {processedLine}
+              </p>
+            );
+          })}
         </div>
-      );
-    }).filter(Boolean);
+      </div>
+    );
   };
 
   return (
@@ -250,7 +144,7 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
         ) : content ? (
           <>
             {showPreview ? (
-              <div className="space-y-6 mb-6">
+              <div className="mb-6">
                 {parseStudyGuide()}
               </div>
             ) : (
@@ -277,10 +171,10 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ title, content, i
               
               <button 
                 onClick={handleDownload} 
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Descargar PDF
+                Descargar como PDF
               </button>
             </div>
           </>
