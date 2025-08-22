@@ -2,13 +2,13 @@
 const isDevelopment = import.meta.env.DEV;
 
 export const API_CONFIG = {
-  GUION_ENDPOINT: 'https://educacion-ia-438857114479.us-central1.run.app/guion',
+  GUION_ENDPOINT: 'https://agente-estudios-127465468754.us-central1.run.app/guion',
   
-  PRESENTACION_ENDPOINT: 'https://educacion-ia-438857114479.us-central1.run.app/presentacion',
+  PRESENTACION_ENDPOINT: 'https://agente-estudios-127465468754.us-central1.run.app/presentacion',
   
-  ENLACES_ENDPOINT: 'https://educacion-ia-438857114479.us-central1.run.app/enlaces',
+  ENLACES_ENDPOINT: 'https://agente-estudios-127465468754.us-central1.run.app/enlaces',
   
-  ALUMNO_GUIA_ENDPOINT: 'https://educacion-ia-438857114479.us-central1.run.app/alumnoguia'
+  ALUMNO_GUIA_ENDPOINT: 'https://agente-estudios-127465468754.us-central1.run.app/alumnoguia'
 };
 
 // API utility functions
